@@ -14,7 +14,7 @@ struct MovieDetailView: View {
                         .frame(height: 350)
                         .overlay {
                             LinearGradient(
-                                colors: [.clear, SlooshTheme.background],
+                                colors: [.clear, Color(red: 0.08, green: 0.10, blue: 0.18)],
                                 startPoint: .center,
                                 endPoint: .bottom
                             )
