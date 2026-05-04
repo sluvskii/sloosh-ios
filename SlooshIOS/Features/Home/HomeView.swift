@@ -2,54 +2,68 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        ZStack {
-            SlooshTheme.background
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                SlooshTheme.background
+                    .ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Sloosh")
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundStyle(.white)
-
-                    Text("Стартовая iOS-база готова. Дальше можно переносить домашний экран, детали фильма и поиск поэтапно.")
-                        .font(.body)
-                        .foregroundStyle(.white.opacity(0.72))
-
-                    GlassCard {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Label("SwiftUI + NavigationStack", systemImage: "iphone.gen3")
-                            Label("Системные материалы вместо самописного glass", systemImage: "drop")
-                            Label("Минимальный iOS target: 18.0", systemImage: "hammer")
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 32) {
+                        
+                        // Trending Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("В тренде")
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 20)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(MockData.trendingMovies) { movie in
+                                        NavigationLink(value: movie) {
+                                            MovieCardView(movie: movie)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
                         }
-                        .font(.headline)
-                        .foregroundStyle(.white)
+                        
+                        // New Series Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Новые сериалы")
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 20)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(MockData.newSeries) { movie in
+                                        NavigationLink(value: movie) {
+                                            MovieCardView(movie: movie)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                        }
+                        
+                        Spacer(minLength: 40)
                     }
-
-                    NavigationLink {
-                        Text("Следующим шагом тут можно открыть экран деталей фильма.")
-                            .padding()
-                            .navigationTitle("Детали")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                            .background(SlooshTheme.background.ignoresSafeArea())
-                    } label: {
-                        Text("Открыть пример навигации")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(SlooshTheme.accent)
+                    .padding(.top, 20)
                 }
-                .padding(20)
+            }
+            .navigationTitle("Sloosh")
+            .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(for: Movie.self) { movie in
+                MovieDetailView(movie: movie)
             }
         }
-        .navigationTitle("Главная")
-        .navigationBarTitleDisplayMode(.large)
     }
 }
 
 #Preview {
-    RootView()
-        .preferredColorScheme(.dark)
+    HomeView()
 }
