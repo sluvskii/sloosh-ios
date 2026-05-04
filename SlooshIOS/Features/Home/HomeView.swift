@@ -55,7 +55,7 @@ struct HomeView: View {
                     .padding(.top, 20)
                 }
             }
-            .navigationTitle("Sloosh")
+            .navigationTitle("sloosh")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Movie.self) { movie in
                 MovieDetailView(movie: movie)

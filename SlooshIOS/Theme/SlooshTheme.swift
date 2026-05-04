@@ -10,5 +10,5 @@ enum SlooshTheme {
         endPoint: .bottomTrailing
     )
 
-    static let accent = Color(red: 0.47, green: 0.78, blue: 1.0)
+    static let accent = Color(red: 0.70, green: 1.0, blue: 0.0) // #B3FF00
 }
