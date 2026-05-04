@@ -14,7 +14,7 @@ struct GlassCard<Content: View>: View {
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(.white.opacity(0.14), lineWidth: 1)
+                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
             }
     }
 }
@@ -25,7 +25,7 @@ struct GlassCard<Content: View>: View {
 
         GlassCard {
             Text("Liquid-like card")
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
         }
         .padding()
     }

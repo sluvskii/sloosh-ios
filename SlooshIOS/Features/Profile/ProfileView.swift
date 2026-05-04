@@ -21,7 +21,7 @@ struct ProfileView: View {
                         
                         Text("Киноман")
                             .font(.title2.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary)
                         
                         GlassCard {
                             VStack(spacing: 0) {
@@ -33,7 +33,7 @@ struct ProfileView: View {
                                     SettingsRow(icon: "heart.fill", title: "Избранное")
                                 }
                                 
-                                Divider().background(.white.opacity(0.2)).padding(.vertical, 12)
+                                Divider().background(Color.primary.opacity(0.1)).padding(.vertical, 12)
                                 
                                 NavigationLink {
                                     Text("Настройки")
@@ -66,13 +66,13 @@ struct SettingsRow: View {
             
             Text(title)
                 .font(.body)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
             
             Spacer()
             
             Image(systemName: "chevron.right")
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.3))
+                .foregroundStyle(.tertiary)
         }
         .contentShape(Rectangle())
     }

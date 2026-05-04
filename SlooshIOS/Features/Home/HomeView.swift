@@ -14,7 +14,7 @@ struct HomeView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("В тренде")
                                 .font(.title2.weight(.bold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                                 .padding(.horizontal, 20)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -34,7 +34,7 @@ struct HomeView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Новые сериалы")
                                 .font(.title2.weight(.bold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                                 .padding(.horizontal, 20)
                             
                             ScrollView(.horizontal, showsIndicators: false) {

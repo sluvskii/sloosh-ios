@@ -13,10 +13,10 @@ struct SearchView: View {
                         VStack(spacing: 16) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 48))
-                                .foregroundStyle(.white.opacity(0.3))
+                                .foregroundStyle(.tertiary)
                             Text("Поиск фильмов и сериалов")
                                 .font(.headline)
-                                .foregroundStyle(.white.opacity(0.5))
+                                .foregroundStyle(.secondary)
                         }
                     } else {
                         // Here will be search results

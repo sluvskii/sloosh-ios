@@ -24,7 +24,7 @@ struct RootView: View {
             // Customize TabBar appearance
             let appearance = UITabBarAppearance()
             appearance.configureWithDefaultBackground()
-            appearance.backgroundColor = UIColor(red: 0.05, green: 0.06, blue: 0.1, alpha: 0.95)
+            // appearance.backgroundColor = ... (uses default adaptive)
             
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
@@ -34,5 +34,5 @@ struct RootView: View {
 
 #Preview {
     RootView()
-        .preferredColorScheme(.dark)
+        // .preferredColorScheme(.dark)
 }

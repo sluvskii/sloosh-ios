@@ -14,7 +14,7 @@ struct MovieDetailView: View {
                         .frame(height: 350)
                         .overlay {
                             LinearGradient(
-                                colors: [.clear, Color(red: 0.08, green: 0.10, blue: 0.18)],
+                                colors: [.clear, SlooshTheme.background],
                                 startPoint: .center,
                                 endPoint: .bottom
                             )
@@ -23,7 +23,7 @@ struct MovieDetailView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(movie.title)
                             .font(.largeTitle.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary)
                         
                         HStack(spacing: 12) {
                             Label(String(format: "%.1f", movie.rating), systemImage: "star.fill")
@@ -34,7 +34,7 @@ struct MovieDetailView: View {
                             Text(movie.duration)
                         }
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.secondary)
                     }
                     .padding()
                 }
@@ -61,7 +61,7 @@ struct MovieDetailView: View {
                                 .font(.headline)
                                 .padding(14)
                                 .background(.ultraThinMaterial, in: Circle())
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                         }
                     }
                     
@@ -69,11 +69,11 @@ struct MovieDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("О фильме")
                             .font(.title3.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary)
                         
                         Text(movie.description)
                             .font(.body)
-                            .foregroundStyle(.white.opacity(0.7))
+                            .foregroundStyle(.secondary)
                             .lineSpacing(4)
                     }
                     
@@ -81,12 +81,12 @@ struct MovieDetailView: View {
                     GlassCard {
                         VStack(alignment: .leading, spacing: 12) {
                             InfoRow(title: "Жанр", value: movie.genre)
-                            Divider().background(.white.opacity(0.2))
+                            Divider().background(Color.primary.opacity(0.1))
                             InfoRow(title: "Год выхода", value: movie.year)
-                            Divider().background(.white.opacity(0.2))
+                            Divider().background(Color.primary.opacity(0.1))
                             InfoRow(title: "Длительность", value: movie.duration)
                         }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                     }
                 }
                 .padding()
@@ -105,7 +105,7 @@ struct InfoRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .foregroundStyle(.white.opacity(0.6))
+                .foregroundStyle(.secondary)
             Spacer()
             Text(value)
                 .fontWeight(.medium)
