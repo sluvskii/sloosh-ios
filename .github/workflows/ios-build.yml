@@ -64,8 +64,14 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             archive
 
-      - name: Upload Archive Artifact
+      - name: Create Unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/SlooshIOS.xcarchive/Products/Applications/SlooshIOS.app Payload/
+          zip -r build/SlooshIOS.ipa Payload
+
+      - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SlooshIOS-unsigned-xcarchive
-          path: build/SlooshIOS.xcarchive
+          name: SlooshIOS-unsigned-ipa
+          path: build/SlooshIOS.ipa
