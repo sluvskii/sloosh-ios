@@ -101,8 +101,8 @@ struct HomeView: View {
         isLoading = true
         errorMessage = nil
         do {
-            async let fetchTrending = NeoMoviesService.shared.fetch(endpoint: .trendingMovies)
-            async let fetchSeries = NeoMoviesService.shared.fetch(endpoint: .newSeries)
+            async let fetchTrending = NeoMoviesService.shared.fetch(endpoint: .popularMovies)
+            async let fetchSeries = NeoMoviesService.shared.fetch(endpoint: .topRatedSeries)
             
             let (trending, series) = try await (fetchTrending, fetchSeries)
             
