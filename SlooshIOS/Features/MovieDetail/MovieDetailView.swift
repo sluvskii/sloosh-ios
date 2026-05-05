@@ -234,8 +234,19 @@ struct PlayerView: View {
     private func loadVideo() async {
         do {
             let url = try await PlayerService.shared.getDirectM3U8(kpId: movie.id)
+            
+            // Прокидываем заголовки, чтобы CDN не отбивал запросы с ошибкой 403 (1011)
+            let headers: [String: String] = [
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
+                "Referer": "https://neomovies.ru/",
+                "Origin": "https://neomovies.ru"
+            ]
+            let options = ["AVURLAssetHTTPHeaderFieldsKey": headers]
+            let asset = AVURLAsset(url: url, options: options)
+            let playerItem = AVPlayerItem(asset: asset)
+            
             await MainActor.run {
-                self.player = AVPlayer(url: url)
+                self.player = AVPlayer(playerItem: playerItem)
                 self.isLoading = false
             }
         } catch {

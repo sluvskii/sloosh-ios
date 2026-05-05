@@ -126,24 +126,6 @@ class PlayerService {
         return try JSONDecoder().decode([CDNEpisode].self, from: data)
     }
     
-    class RedirectDelegate: NSObject, URLSessionTaskDelegate {
-        var finalURL: URL?
-        func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-            finalURL = request.url
-            completionHandler(nil) // Stop redirecting
-        }
-    }
-    
-    func resolveRedirect(url: URL) async throws -> URL {
-        let delegate = RedirectDelegate()
-        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        _ = try? await session.data(for: request)
-        return delegate.finalURL ?? url
-    }
-    
     func getDirectM3U8(kpId: String, season: Int? = nil, episode: Int? = nil) async throws -> URL {
         let cleanId = kpId.replacingOccurrences(of: "kp_", with: "")
         let cdnId = try await resolveCDNId(kpId: cleanId)
@@ -164,7 +146,17 @@ class PlayerService {
             m3u8UrlString = variant.filepath
         }
         
+        if m3u8UrlString.hasPrefix("//") {
+            m3u8UrlString = "https:" + m3u8UrlString
+        } else if m3u8UrlString.hasPrefix("/") {
+            m3u8UrlString = "https://api.rstprgapipt.com" + m3u8UrlString
+        }
+        
         guard let initialUrl = URL(string: m3u8UrlString) else { throw URLError(.badURL) }
-        return try await resolveRedirect(url: initialUrl)
+        
+        // Мы убрали ручной resolveRedirect, потому что AVPlayer (AVURLAsset) 
+        // сам отлично следует по 302/307 редиректам, 
+        // плюс мы сможем прокинуть нужные заголовки прямо в AVURLAsset.
+        return initialUrl
     }
 }
