@@ -1,12 +1,12 @@
 import Foundation
 
-struct StreamResponse: Codable {
-    let title: String
-    let initialM3u8: String
-    let initialSeason: Int
-    let initialEpisode: Int
-    let episodes: [StreamEpisode]
-    let isSeries: Bool
+public struct StreamResponse: Codable {
+    public let title: String
+    public let initialM3u8: String
+    public let initialSeason: Int
+    public let initialEpisode: Int
+    public let episodes: [StreamEpisode]
+    public let isSeries: Bool
     
     enum CodingKeys: String, CodingKey {
         case title
@@ -18,17 +18,17 @@ struct StreamResponse: Codable {
     }
 }
 
-struct StreamEpisode: Codable, Identifiable, Hashable {
-    let season: Int
-    let episode: Int
-    let title: String
-    let filepath: String
+public struct StreamEpisode: Codable, Identifiable, Hashable {
+    public let season: Int
+    public let episode: Int
+    public let title: String
+    public let filepath: String
     
-    var id: String { "\(season)-\(episode)" }
+    public var id: String { "\(season)-\(episode)" }
 }
 
-struct Season: Identifiable, Hashable {
-    let id: String
-    let number: Int
-    let episodes: [StreamEpisode]
+public struct Season: Identifiable, Hashable {
+    public let id: String
+    public let number: Int
+    public let episodes: [StreamEpisode]
 }

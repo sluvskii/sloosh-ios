@@ -33,7 +33,6 @@ class NeoMoviesService {
             throw error
         }
     }
-}
     
     struct NeoMoviesResponse<T: Codable>: Codable {
         let success: Bool
