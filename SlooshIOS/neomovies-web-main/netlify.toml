@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build"
+  functions = "netlify/functions"
+  publish = "dist"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production.environment]
+  VITE_API_URL = "https://api.neomovies.ru"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://api.neomovies.ru"
+
+[context.branch-deploy.environment]
+  VITE_API_URL = "https://api.neomovies.ru"

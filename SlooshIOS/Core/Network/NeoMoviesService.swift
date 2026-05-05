@@ -10,42 +10,9 @@ class NeoMoviesService {
         let data: T
     }
     
-    func fetchStream(kpId: String, season: Int? = nil, episode: Int? = nil) async throws -> StreamResponse {
+    func fetchStreamURL(kpId: String, season: Int? = nil, episode: Int? = nil) -> URL? {
         let urlString = baseURL + Endpoint.stream(kpId: kpId, season: season, episode: episode).path
-        
-        guard let url = URL(string: urlString) else {
-            throw URLError(.badURL)
-        }
-        
-        var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        
-        if !(200..<300).contains(httpResponse.statusCode) {
-            print("Stream API Error: Status code \(httpResponse.statusCode), URL: \(urlString)")
-            if let errorBody = String(data: data, encoding: .utf8) {
-                print("Error body: \(errorBody)")
-            }
-            throw URLError(.badServerResponse)
-        }
-        
-        let decoder = JSONDecoder()
-        
-        do {
-            let apiResponse = try decoder.decode(NeoResponse<StreamResponse>.self, from: data)
-            return apiResponse.data
-        } catch {
-            print("Failed to decode stream response: \(error)")
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Raw JSON: \(jsonString)")
-            }
-            throw error
-        }
+        return URL(string: urlString)
     }
     
     struct NeoMoviesResponse<T: Codable>: Codable {
@@ -70,7 +37,7 @@ class NeoMoviesService {
             case .topRatedSeries: return "/tv/top-rated"
             case .stream(let kpId, let season, let episode):
                 let cleanKpId = kpId.replacingOccurrences(of: "kp_", with: "")
-                var base = "/stream/kp/\(cleanKpId)"
+                var base = "/players/cdn/kp/\(cleanKpId)"
                 var params: [String] = []
                 if let s = season { params.append("season=\(s)") }
                 if let e = episode { params.append("episode=\(e)") }
