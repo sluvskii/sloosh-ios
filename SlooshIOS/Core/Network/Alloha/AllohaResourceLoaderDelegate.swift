@@ -10,6 +10,8 @@ class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         self.headers = headers
         super.init()
         let config = URLSessionConfiguration.default
+        config.httpCookieStorage = HTTPCookieStorage.shared
+        config.httpShouldSetCookies = true
         self.session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
     }
     
@@ -33,6 +35,13 @@ class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         var request = URLRequest(url: actualURL)
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        if let cookies = HTTPCookieStorage.shared.cookies(for: actualURL), !cookies.isEmpty {
+            let cookieHeaders = HTTPCookie.requestHeaderFields(with: cookies)
+            for (key, value) in cookieHeaders {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
         }
         
         // Also set Range header if needed
@@ -75,6 +84,13 @@ class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         if let request = pendingRequests.first(where: { $0.value == dataTask })?.key {
+            if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+                request.finishLoading(with: URLError(.badServerResponse))
+                pendingRequests.removeValue(forKey: request)
+                completionHandler(.cancel)
+                return
+            }
+
             if let contentInfoRequest = request.contentInformationRequest {
                 let mimeType = response.mimeType ?? ""
                 if mimeType.contains("mpegurl") || mimeType.contains("m3u8") || request.request.url?.pathExtension == "m3u8" {
@@ -125,28 +141,53 @@ class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         var newLines = [String]()
         
         for line in lines {
-            if line.hasPrefix("#") || line.isEmpty {
+            if line.isEmpty {
                 newLines.append(line)
+            } else if line.hasPrefix("#") {
+                newLines.append(rewriteTaggedURIs(in: line, baseURL: baseURL))
             } else {
-                // This is a URI
-                if let uriURL = URL(string: line, relativeTo: baseURL) {
-                    var components = URLComponents(url: uriURL, resolvingAgainstBaseURL: true)
-                    if components?.scheme == "https" {
-                        components?.scheme = "alloha-https"
-                    } else if components?.scheme == "http" {
-                        components?.scheme = "alloha-http"
-                    }
-                    if let modifiedURLString = components?.url?.absoluteString {
-                        newLines.append(modifiedURLString)
-                    } else {
-                        newLines.append(line)
-                    }
-                } else {
-                    newLines.append(line)
-                }
+                newLines.append(rewriteURLString(line, baseURL: baseURL) ?? line)
             }
         }
         
         return newLines.joined(separator: "\n")
+    }
+
+    private func rewriteTaggedURIs(in line: String, baseURL: URL) -> String {
+        let pattern = #"URI="([^"]+)""#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return line
+        }
+
+        let nsLine = line as NSString
+        let matches = regex.matches(in: line, range: NSRange(location: 0, length: nsLine.length))
+        guard !matches.isEmpty else { return line }
+
+        var rewrittenLine = line
+        for match in matches.reversed() {
+            guard match.numberOfRanges > 1 else { continue }
+            let uri = nsLine.substring(with: match.range(at: 1))
+            guard let rewrittenURL = rewriteURLString(uri, baseURL: baseURL) else { continue }
+            let fullRange = match.range(at: 0)
+            guard let swiftRange = Range(fullRange, in: rewrittenLine) else { continue }
+            rewrittenLine.replaceSubrange(swiftRange, with: #"URI="\#(rewrittenURL)""#)
+        }
+
+        return rewrittenLine
+    }
+
+    private func rewriteURLString(_ urlString: String, baseURL: URL) -> String? {
+        guard let uriURL = URL(string: urlString, relativeTo: baseURL)?.absoluteURL else {
+            return nil
+        }
+
+        var components = URLComponents(url: uriURL, resolvingAgainstBaseURL: true)
+        if components?.scheme == "https" {
+            components?.scheme = "alloha-https"
+        } else if components?.scheme == "http" {
+            components?.scheme = "alloha-http"
+        }
+
+        return components?.url?.absoluteString
     }
 }

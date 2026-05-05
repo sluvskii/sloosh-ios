@@ -68,6 +68,17 @@ class AllohaParser: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
             self.webView.configuration.userContentController.removeScriptMessageHandler(forName: "AndroidBridge")
         }
     }
+
+    private func syncCookiesToSharedStorage(completion: @escaping () -> Void) {
+        let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
+        cookieStore.getAllCookies { cookies in
+            let sharedStorage = HTTPCookieStorage.shared
+            for cookie in cookies {
+                sharedStorage.setCookie(cookie)
+            }
+            completion()
+        }
+    }
     
     // MARK: - WKNavigationDelegate (Ignore SSL Errors)
     
@@ -89,25 +100,33 @@ class AllohaParser: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
             isParsed = true
             let json = body["jsonResponse"] as? String ?? ""
             let headers = body["headers"] as? [String: String] ?? [:]
-            delegate?.onHlsLinksReceived(json: json, extraHeaders: headers)
+            syncCookiesToSharedStorage { [weak self] in
+                self?.delegate?.onHlsLinksReceived(json: json, extraHeaders: headers)
+            }
             
         case "onConfigUpdate":
             if !isParsed { return }
             let edgeHash = body["edgeHash"] as? String ?? ""
             let ttl = body["ttl"] as? Int ?? 120
             let headers = body["headers"] as? [String: String] ?? [:]
-            delegate?.onConfigUpdate(edgeHash: edgeHash, ttlSeconds: ttl, extraHeaders: headers)
+            syncCookiesToSharedStorage { [weak self] in
+                self?.delegate?.onConfigUpdate(edgeHash: edgeHash, ttlSeconds: ttl, extraHeaders: headers)
+            }
             
         case "onM3u8Refreshed":
             if !isParsed { return }
             let url = body["url"] as? String ?? ""
             let headers = body["headers"] as? [String: String] ?? [:]
-            delegate?.onM3u8Refreshed(url: url, extraHeaders: headers)
+            syncCookiesToSharedStorage { [weak self] in
+                self?.delegate?.onM3u8Refreshed(url: url, extraHeaders: headers)
+            }
             
         case "onStreamHeaders":
             if !isParsed { return }
             let headers = body["headers"] as? [String: String] ?? [:]
-            delegate?.onStreamHeadersUpdated(extraHeaders: headers)
+            syncCookiesToSharedStorage { [weak self] in
+                self?.delegate?.onStreamHeadersUpdated(extraHeaders: headers)
+            }
             
         case "onLog":
             let msg = body["msg"] as? String ?? ""

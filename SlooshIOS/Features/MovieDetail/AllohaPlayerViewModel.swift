@@ -11,6 +11,8 @@ class AllohaPlayerViewModel: ObservableObject, AllohaParserDelegate {
     private var parser: AllohaParser?
     private var resourceLoaderDelegate: AllohaResourceLoaderDelegate?
     private var currentMovie: Movie?
+    private var playerItemStatusObservation: NSKeyValueObservation?
+    private var playerItemFailedObserver: NSObjectProtocol?
     
     func loadVideo(for movie: Movie) async {
         self.currentMovie = movie
@@ -43,6 +45,11 @@ class AllohaPlayerViewModel: ObservableObject, AllohaParserDelegate {
         parser?.release()
         parser = nil
         resourceLoaderDelegate = nil
+        playerItemStatusObservation = nil
+        if let playerItemFailedObserver {
+            NotificationCenter.default.removeObserver(playerItemFailedObserver)
+            self.playerItemFailedObserver = nil
+        }
     }
     
     // MARK: - AllohaParserDelegate
@@ -81,6 +88,28 @@ class AllohaPlayerViewModel: ObservableObject, AllohaParserDelegate {
         asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: .global(qos: .userInitiated))
         
         let playerItem = AVPlayerItem(asset: asset)
+        playerItemStatusObservation = playerItem.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if item.status == .failed {
+                    self.errorMessage = item.error?.localizedDescription ?? "Не удалось начать воспроизведение"
+                    self.isLoading = false
+                }
+            }
+        }
+        if let playerItemFailedObserver {
+            NotificationCenter.default.removeObserver(playerItemFailedObserver)
+        }
+        playerItemFailedObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemFailedToPlayToEndTime,
+            object: playerItem,
+            queue: .main
+        ) { [weak self] notification in
+            let error = notification.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? NSError
+            self?.errorMessage = error?.localizedDescription ?? "Воспроизведение было прервано"
+            self?.isLoading = false
+        }
+
         self.player = AVPlayer(playerItem: playerItem)
         self.isLoading = false
         self.player?.play()
