@@ -20,6 +20,8 @@
 		A0000000000000000000001B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* SearchView.swift */; };
 		A0000000000000000000001C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* ProfileView.swift */; };
 		A0000000000000000000001D /* NeoMoviesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* NeoMoviesService.swift */; };
+		A0000000000000000000001D /* PlayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* PlayerModels.swift */; };
+		A0000000000000000000001E /* PlayerSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000F /* PlayerSelectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +39,8 @@
 		A0000000000000000000000C /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000E /* NeoMoviesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeoMoviesService.swift; sourceTree = "<group>"; };
+		A0000000000000000000000E /* PlayerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerModels.swift; sourceTree = "<group>"; };
+		A0000000000000000000000F /* PlayerSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000038 /* Home */,
+								A0000000000000000000003F /* Player */,
 				A0000000000000000000003A /* MovieDetail */,
 				A0000000000000000000003B /* Search */,
 				A0000000000000000000003C /* Profile */,
@@ -184,6 +189,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		A0000000000000000000003F /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				A0000000000000000000000E /* PlayerModels.swift */,
+				A0000000000000000000000F /* PlayerSelectionView.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -264,6 +278,9 @@
 				A0000000000000000000001A /* MovieDetailView.swift in Sources */,
 				A0000000000000000000001B /* SearchView.swift in Sources */,
 				A0000000000000000000001C /* ProfileView.swift in Sources */,
+				A0000000000000000000001D /* PlayerModels.swift in Sources */,
+				A0000000000000000000001E /* PlayerSelectionView.swift in Sources */,
+
 				A0000000000000000000001D /* NeoMoviesService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

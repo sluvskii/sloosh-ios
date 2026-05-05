@@ -3,7 +3,8 @@ import SwiftUI
 struct MovieDetailView: View {
     let movie: Movie
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
+    
+    @State private var showPlayerSelection = false
     
     var body: some View {
         ScrollView {
@@ -80,11 +81,7 @@ struct MovieDetailView: View {
                     // Action Buttons
                     HStack(spacing: 16) {
                         Button {
-                            // Extract Kinopoisk ID if it has "kp_" prefix
-                            let cleanId = movie.id.replacingOccurrences(of: "kp_", with: "")
-                            if let url = URL(string: "https://api.neomovies.ru/api/v1/players/alloha/kp/\(cleanId)") {
-                                openURL(url)
-                            }
+                            showPlayerSelection = true
                         } label: {
                             Label("Смотреть", systemImage: "play.fill")
                                 .font(.headline)
@@ -136,6 +133,11 @@ struct MovieDetailView: View {
         .background(SlooshTheme.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showPlayerSelection) {
+            PlayerSelectionView(movie: movie)
+                .presentationDetents([.fraction(0.8), .large])
+                .presentationDragIndicator(.visible)
+        }
     }
 }
 
