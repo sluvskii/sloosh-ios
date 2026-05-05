@@ -1,10 +1,11 @@
 import SwiftUI
+import AVKit
 
 struct MovieDetailView: View {
     let movie: Movie
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var showPlayerSelection = false
+    @Environment(\.openURL) private var openURL
+    @State private var isPlayerPresented = false
     
     var body: some View {
         ScrollView {
@@ -81,7 +82,7 @@ struct MovieDetailView: View {
                     // Action Buttons
                     HStack(spacing: 16) {
                         Button {
-                            showPlayerSelection = true
+                            isPlayerPresented = true
                         } label: {
                             Label("Смотреть", systemImage: "play.fill")
                                 .font(.headline)
@@ -133,10 +134,8 @@ struct MovieDetailView: View {
         .background(SlooshTheme.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showPlayerSelection) {
-            PlayerSelectionView(movie: movie)
-                .presentationDetents([.fraction(0.8), .large])
-                .presentationDragIndicator(.visible)
+        .fullScreenCover(isPresented: $isPlayerPresented) {
+            PlayerView(movie: movie)
         }
     }
 }
@@ -159,5 +158,91 @@ struct InfoRow: View {
 #Preview {
     NavigationStack {
         MovieDetailView(movie: MockData.trendingMovies[0])
+    }
+}
+
+struct PlayerView: View {
+    let movie: Movie
+    @State private var player: AVPlayer?
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            if let player = player {
+                VideoPlayer(player: player)
+                    .ignoresSafeArea()
+                    .onAppear {
+                        player.play()
+                    }
+                    .onDisappear {
+                        player.pause()
+                    }
+            } else if isLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .tint(.white)
+                    Text("Загрузка видео...")
+                        .foregroundStyle(.white)
+                }
+            } else if let errorMessage = errorMessage {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.largeTitle)
+                        .foregroundStyle(.red)
+                    Text("Ошибка загрузки видео")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text(errorMessage)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Button("Закрыть") {
+                        dismiss()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SlooshTheme.accent)
+                    .foregroundStyle(.black)
+                    .padding(.top)
+                }
+            }
+            
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(.white.opacity(0.8))
+                            .padding()
+                    }
+                }
+                Spacer()
+            }
+        }
+        .task {
+            await loadVideo()
+        }
+    }
+    
+    private func loadVideo() async {
+        do {
+            let url = try await PlayerService.shared.getDirectM3U8(kpId: movie.id)
+            await MainActor.run {
+                self.player = AVPlayer(url: url)
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.isLoading = false
+            }
+        }
     }
 }

@@ -7,16 +7,6 @@ class NeoMoviesService {
     
     struct NeoResponse<T: Codable>: Codable {
         let success: Bool
-        let data: T
-    }
-    
-    func fetchStreamURL(kpId: String, season: Int? = nil, episode: Int? = nil) -> URL? {
-        let urlString = baseURL + Endpoint.stream(kpId: kpId, season: season, episode: episode).path
-        return URL(string: urlString)
-    }
-    
-    struct NeoMoviesResponse<T: Codable>: Codable {
-        let success: Bool
         let data: NeoData<T>
     }
     
@@ -29,22 +19,11 @@ class NeoMoviesService {
     enum Endpoint {
         case popularMovies
         case topRatedSeries
-        case stream(kpId: String, season: Int?, episode: Int?)
         
         var path: String {
             switch self {
             case .popularMovies: return "/movies/popular"
             case .topRatedSeries: return "/tv/top-rated"
-            case .stream(let kpId, let season, let episode):
-                let cleanKpId = kpId.replacingOccurrences(of: "kp_", with: "")
-                var base = "/players/cdn/kp/\(cleanKpId)"
-                var params: [String] = []
-                if let s = season { params.append("season=\(s)") }
-                if let e = episode { params.append("episode=\(e)") }
-                if !params.isEmpty {
-                    base += "?" + params.joined(separator: "&")
-                }
-                return base
             }
         }
     }
@@ -65,11 +44,127 @@ class NeoMoviesService {
         let decoder = JSONDecoder()
         
         do {
-            let apiResponse = try decoder.decode(NeoMoviesResponse<[Movie]>.self, from: data)
+            let apiResponse = try decoder.decode(NeoResponse<[Movie]>.self, from: data)
             return apiResponse.data.results
         } catch {
             print("Failed to decode NeoMovies API response: \(error)")
             throw error
         }
+    }
+}
+
+class PlayerService {
+    static let shared = PlayerService()
+    
+    private let cdnToken = "eyJhbGciOiJIUzI1NiJ9.eyJ3ZWJTaXRlIjoiMzQiLCJpc3MiOiJhcGktd2VibWFzdGVyIiwic3ViIjoiNDEiLCJpYXQiOjE3NDMwNjA3ODAsImp0aSI6IjIzMTQwMmE0LTM3NTMtNGQ3OS1hNDBjLTA2YTY0MTE0MzNhOSIsInNjb3BlIjoiRExFIn0.4PmKGf512P-ov-tEjwr3gfOVxccjx8SSt28slJXypYU"
+    
+    struct CDNContentInfo: Codable {
+        let id: Int
+        let title: String
+        let hasMultipleEpisodes: Bool
+        let trailerUrls: [String]?
+    }
+
+    struct CDNEpisode: Codable {
+        let id: Int
+        let title: String
+        let order: Int
+        let season: CDNSeason
+        let episodeVariants: [CDNVariant]?
+    }
+
+    struct CDNSeason: Codable {
+        let id: Int
+        let order: Int
+    }
+
+    struct CDNVariant: Codable {
+        let filepath: String
+    }
+    
+    private func getHeaders() -> [String: String] {
+        return [
+            "DLE-API-TOKEN": cdnToken,
+            "Iframe-Request-Id": "7f2a4c1b-ca44-4858-b6ab-71894c7bb1aa"
+        ]
+    }
+    
+    func resolveCDNId(kpId: String) async throws -> Int {
+        let urlString = "https://api.rstprgapipt.com/balancer-api/iframe?kp=\(kpId)&token=\(cdnToken)&disabled_share=1"
+        guard let url = URL(string: urlString) else { throw URLError(.badURL) }
+        
+        let (data, _) = try await URLSession.shared.data(from: url)
+        guard let html = String(data: data, encoding: .utf8) else { throw URLError(.badServerResponse) }
+        
+        if let range = html.range(of: "window.MOVIE_ID=") {
+            let substring = html[range.upperBound...]
+            if let endRange = substring.range(of: ";") {
+                let idStr = String(substring[..<endRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if let id = Int(idStr) {
+                    return id
+                }
+            }
+        }
+        throw URLError(.cannotParseResponse)
+    }
+    
+    func getCDNContentInfo(cdnId: Int) async throws -> CDNContentInfo {
+        let url = URL(string: "https://api.rstprgapipt.com/balancer-api/proxy/playlists/catalog-api/contents/\(cdnId)")!
+        var request = URLRequest(url: url)
+        for (k, v) in getHeaders() { request.addValue(v, forHTTPHeaderField: k) }
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        return try JSONDecoder().decode(CDNContentInfo.self, from: data)
+    }
+
+    func getCDNEpisodes(cdnId: Int) async throws -> [CDNEpisode] {
+        let url = URL(string: "https://api.rstprgapipt.com/balancer-api/proxy/playlists/catalog-api/episodes?content-id=\(cdnId)")!
+        var request = URLRequest(url: url)
+        for (k, v) in getHeaders() { request.addValue(v, forHTTPHeaderField: k) }
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        return try JSONDecoder().decode([CDNEpisode].self, from: data)
+    }
+    
+    class RedirectDelegate: NSObject, URLSessionTaskDelegate {
+        var finalURL: URL?
+        func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+            finalURL = request.url
+            completionHandler(nil) // Stop redirecting
+        }
+    }
+    
+    func resolveRedirect(url: URL) async throws -> URL {
+        let delegate = RedirectDelegate()
+        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        _ = try? await session.data(for: request)
+        return delegate.finalURL ?? url
+    }
+    
+    func getDirectM3U8(kpId: String, season: Int? = nil, episode: Int? = nil) async throws -> URL {
+        let cleanId = kpId.replacingOccurrences(of: "kp_", with: "")
+        let cdnId = try await resolveCDNId(kpId: cleanId)
+        let info = try await getCDNContentInfo(cdnId: cdnId)
+        
+        var m3u8UrlString: String
+        
+        if !info.hasMultipleEpisodes {
+            guard let urls = info.trailerUrls, let url = urls.first else { throw URLError(.cannotFindHost) }
+            m3u8UrlString = url
+        } else {
+            let episodes = try await getCDNEpisodes(cdnId: cdnId)
+            let targetSeason = season ?? 1
+            let targetEpisode = episode ?? 1
+            
+            let ep = episodes.first { $0.season.order == targetSeason && $0.order == targetEpisode } ?? episodes.first
+            guard let variant = ep?.episodeVariants?.first else { throw URLError(.cannotFindHost) }
+            m3u8UrlString = variant.filepath
+        }
+        
+        guard let initialUrl = URL(string: m3u8UrlString) else { throw URLError(.badURL) }
+        return try await resolveRedirect(url: initialUrl)
     }
 }

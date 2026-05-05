@@ -20,7 +20,7 @@ use tower_http::cors::{Any, CorsLayer};
 use vercel_runtime::{Response, ResponseBody};
 
 use neomovies_api::handlers::{
-    auth, cdn_player, favorites, health, hls_proxy, images, media, players, search, support, torrents, webhook, stream,
+    auth, cdn_player, favorites, health, hls_proxy, images, media, players, search, support, torrents, webhook,
 };
 
 async fn from_vercel(resp: Response<ResponseBody>) -> AxumResponse {
@@ -112,15 +112,6 @@ async fn route_cdn_player_by_kp(
     let season = params.get("season").and_then(|s| s.parse().ok());
     let episode = params.get("episode").and_then(|s| s.parse().ok());
     from_vercel(cdn_player::handle_by_kp(kp_id, season, episode).await).await
-}
-
-async fn route_stream_by_kp(
-    Path(kp_id): Path<u64>,
-    Query(params): Query<HashMap<String, String>>,
-) -> AxumResponse {
-    let season = params.get("season").and_then(|s| s.parse().ok());
-    let episode = params.get("episode").and_then(|s| s.parse().ok());
-    from_vercel(stream::handle_stream_by_kp(kp_id, season, episode).await).await
 }
 
 async fn route_hls_proxy(Query(params): Query<HashMap<String, String>>) -> AxumResponse {
@@ -276,7 +267,6 @@ async fn main() {
         .route("/api/v1/players/{provider}/kp/{kp_id}", get(route_player))
         .route("/api/v1/players/cdn/{cdn_id}", get(route_cdn_player))
         .route("/api/v1/players/cdn/kp/{kp_id}", get(route_cdn_player_by_kp))
-        .route("/api/v1/stream/kp/{kp_id}", get(route_stream_by_kp))
         .route("/api/v1/hls/proxy", get(route_hls_proxy))
         .route("/api/v1/torrents/search", get(route_torrents))
         .route("/api/v1/favorites", get(route_favorites_list))
