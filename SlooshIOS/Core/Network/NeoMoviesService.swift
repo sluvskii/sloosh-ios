@@ -17,9 +17,20 @@ class NeoMoviesService {
             throw URLError(.badURL)
         }
         
-        let (data, response) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         
-        guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        
+        if !(200..<300).contains(httpResponse.statusCode) {
+            print("Stream API Error: Status code \(httpResponse.statusCode), URL: \(urlString)")
+            if let errorBody = String(data: data, encoding: .utf8) {
+                print("Error body: \(errorBody)")
+            }
             throw URLError(.badServerResponse)
         }
         
@@ -30,6 +41,9 @@ class NeoMoviesService {
             return apiResponse.data
         } catch {
             print("Failed to decode stream response: \(error)")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Raw JSON: \(jsonString)")
+            }
             throw error
         }
     }
