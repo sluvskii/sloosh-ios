@@ -50,8 +50,13 @@ class AllohaParser: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
     
     func parse(iframeUrl: String) {
         isParsed = false
-        let wrapperHtml = buildWrapperHtml(iframeUrl: iframeUrl)
-        if let parsedUrl = URL(string: iframeUrl), let host = parsedUrl.host {
+        var secureUrl = iframeUrl
+        if iframeUrl.hasPrefix("http://") {
+            secureUrl = iframeUrl.replacingOccurrences(of: "http://", with: "https://")
+        }
+        
+        let wrapperHtml = buildWrapperHtml(iframeUrl: secureUrl)
+        if let parsedUrl = URL(string: secureUrl), let host = parsedUrl.host {
             let baseUrl = URL(string: "\(parsedUrl.scheme ?? "https")://\(host)/")
             webView.loadHTMLString(wrapperHtml, baseURL: baseUrl)
         }

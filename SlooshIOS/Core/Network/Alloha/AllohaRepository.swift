@@ -27,7 +27,9 @@ class AllohaRepository: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     }
 
     func getContent(kpId: Int) async throws -> AllohaContent {
-        let urlString = "http://api.alloha.tv/?token=\(token)&kp=\(kpId)"
+        // Мы возвращаем https, так как проблема App Transport Security 
+        // возникает в основном из-за загрузки http контента.
+        let urlString = "https://api.alloha.tv/?token=\(token)&kp=\(kpId)"
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }
