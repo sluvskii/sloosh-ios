@@ -67,7 +67,7 @@ struct MovieDetailView: View {
                             Text("•")
                             Text(movie.year)
                             Text("•")
-                            Text(movie.duration)
+                            Text(movie.type == "tv" ? "Сериал" : "Фильм")
                         }
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
@@ -120,7 +120,7 @@ struct MovieDetailView: View {
                             Divider().background(Color.primary.opacity(0.1))
                             InfoRow(title: "Год выхода", value: movie.year)
                             Divider().background(Color.primary.opacity(0.1))
-                            InfoRow(title: "Длительность", value: movie.duration)
+                            InfoRow(title: "Тип", value: movie.type == "tv" ? "Сериал" : "Фильм")
                         }
                         .foregroundStyle(.primary)
                     }

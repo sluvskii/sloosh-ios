@@ -3,32 +3,33 @@ import Foundation
 class NeoMoviesService {
     static let shared = NeoMoviesService()
     
-    // Используем открытое API NeoMovies, которое работает как прокси к TMDB/Кинопоиску
-    private let baseURL = "https://neomovies-api.vercel.app/api/v1"
+    private let baseURL = "https://api.neomovies.ru/api/v1"
     
-    struct NeoResponse: Codable {
-        let results: [Movie]
+    struct NeoResponse<T: Codable>: Codable {
+        let success: Bool
+        let data: NeoData<T>
+    }
+    
+    struct NeoData<T: Codable>: Codable {
+        let results: T
+        let total: Int?
+        let pages: Int?
     }
     
     enum Endpoint {
-        case trendingMovies
-        case newSeries
+        case popularMovies
+        case topRatedSeries
         
         var path: String {
             switch self {
-            case .trendingMovies: return "/movies/popular"
-            case .newSeries: return "/movies/top-rated" // В API пока нет отдельного эндпоинта для трендовых сериалов, используем top-rated как заглушку
+            case .popularMovies: return "/movies/popular"
+            case .topRatedSeries: return "/tv/top-rated"
             }
         }
     }
     
     func fetch(endpoint: Endpoint) async throws -> [Movie] {
-        // Пробуем сначала v1 API, если оно недоступно - переключимся на корневые эндпоинты
-        var urlString = baseURL + endpoint.path
-        
-        // В разных версиях NeoMovies API пути немного отличаются.
-        // Судя по документации старой версии, эндпоинты лежат в корне:
-        urlString = "https://neomovies-api.vercel.app" + endpoint.path
+        let urlString = baseURL + endpoint.path
         
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
@@ -42,14 +43,12 @@ class NeoMoviesService {
         
         let decoder = JSONDecoder()
         
-        // В зависимости от ответа API может возвращать либо массив напрямую, либо объект с полем results
         do {
-            let tmdbResponse = try decoder.decode(NeoResponse.self, from: data)
-            return tmdbResponse.results
+            let apiResponse = try decoder.decode(NeoResponse<[Movie]>.self, from: data)
+            return apiResponse.data.results
         } catch {
-            // Пробуем распарсить как прямой массив
-            let movies = try decoder.decode([Movie].self, from: data)
-            return movies
+            print("Failed to decode NeoMovies API response: \(error)")
+            throw error
         }
     }
 }
