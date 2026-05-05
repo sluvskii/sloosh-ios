@@ -20,6 +20,11 @@
 		A0000000000000000000001B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* SearchView.swift */; };
 		A0000000000000000000001C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* ProfileView.swift */; };
 		A0000000000000000000001D /* NeoMoviesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* NeoMoviesService.swift */; };
+		A00000000000000000000101 /* AllohaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000201 /* AllohaModels.swift */; };
+		A00000000000000000000102 /* AllohaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000202 /* AllohaRepository.swift */; };
+		A00000000000000000000103 /* AllohaParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000203 /* AllohaParser.swift */; };
+		A00000000000000000000104 /* AllohaResourceLoaderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000204 /* AllohaResourceLoaderDelegate.swift */; };
+		A00000000000000000000105 /* AllohaPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000205 /* AllohaPlayerViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +42,11 @@
 		A0000000000000000000000C /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000E /* NeoMoviesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeoMoviesService.swift; sourceTree = "<group>"; };
+		A00000000000000000000201 /* AllohaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaModels.swift; sourceTree = "<group>"; };
+		A00000000000000000000202 /* AllohaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaRepository.swift; sourceTree = "<group>"; };
+		A00000000000000000000203 /* AllohaParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaParser.swift; sourceTree = "<group>"; };
+		A00000000000000000000204 /* AllohaResourceLoaderDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaResourceLoaderDelegate.swift; sourceTree = "<group>"; };
+		A00000000000000000000205 /* AllohaPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaPlayerViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,9 +122,21 @@
 		A0000000000000000000003F /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000301 /* Alloha */,
 				A0000000000000000000000E /* NeoMoviesService.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000301 /* Alloha */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000201 /* AllohaModels.swift */,
+				A00000000000000000000202 /* AllohaRepository.swift */,
+				A00000000000000000000203 /* AllohaParser.swift */,
+				A00000000000000000000204 /* AllohaResourceLoaderDelegate.swift */,
+			);
+			path = Alloha;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000037 /* Theme */ = {
@@ -146,6 +168,7 @@
 		A0000000000000000000003A /* MovieDetail */ = {
 			isa = PBXGroup;
 			children = (
+				A00000000000000000000205 /* AllohaPlayerViewModel.swift */,
 				A0000000000000000000000B /* MovieDetailView.swift */,
 			);
 			path = MovieDetail;
@@ -265,6 +288,11 @@
 				A0000000000000000000001B /* SearchView.swift in Sources */,
 				A0000000000000000000001C /* ProfileView.swift in Sources */,
 				A0000000000000000000001D /* NeoMoviesService.swift in Sources */,
+				A00000000000000000000101 /* AllohaModels.swift in Sources */,
+				A00000000000000000000102 /* AllohaRepository.swift in Sources */,
+				A00000000000000000000103 /* AllohaParser.swift in Sources */,
+				A00000000000000000000104 /* AllohaResourceLoaderDelegate.swift in Sources */,
+				A00000000000000000000105 /* AllohaPlayerViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

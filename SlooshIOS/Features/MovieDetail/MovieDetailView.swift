@@ -168,11 +168,13 @@ struct PlayerView: View {
     @State private var errorMessage: String?
     @Environment(\.dismiss) private var dismiss
     
+    @StateObject private var viewModel = AllohaPlayerViewModel()
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            if let player = player {
+            if let player = viewModel.player {
                 VideoPlayer(player: player)
                     .ignoresSafeArea()
                     .onAppear {
@@ -181,14 +183,14 @@ struct PlayerView: View {
                     .onDisappear {
                         player.pause()
                     }
-            } else if isLoading {
+            } else if viewModel.isLoading {
                 VStack(spacing: 16) {
                     ProgressView()
                         .tint(.white)
                     Text("Загрузка видео...")
                         .foregroundStyle(.white)
                 }
-            } else if let errorMessage = errorMessage {
+            } else if let errorMessage = viewModel.errorMessage {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.largeTitle)
@@ -201,13 +203,23 @@ struct PlayerView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
+                    Button("Повторить") {
+                        Task {
+                            await viewModel.loadVideo(for: movie)
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(SlooshTheme.accent)
+                    .foregroundStyle(.white)
+                    .padding(.top, 8)
+                    
                     Button("Закрыть") {
                         dismiss()
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(SlooshTheme.accent)
                     .foregroundStyle(.black)
-                    .padding(.top)
+                    .padding(.top, 4)
                 }
             }
             
@@ -227,33 +239,10 @@ struct PlayerView: View {
             }
         }
         .task {
-            await loadVideo()
+            await viewModel.loadVideo(for: movie)
         }
-    }
-    
-    private func loadVideo() async {
-        do {
-            let url = try await PlayerService.shared.getDirectM3U8(kpId: movie.id)
-            
-            // Прокидываем заголовки, чтобы CDN не отбивал запросы с ошибкой 403 (1011)
-            let headers: [String: String] = [
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
-                "Referer": "https://neomovies.ru/",
-                "Origin": "https://neomovies.ru"
-            ]
-            let options = ["AVURLAssetHTTPHeaderFieldsKey": headers]
-            let asset = AVURLAsset(url: url, options: options)
-            let playerItem = AVPlayerItem(asset: asset)
-            
-            await MainActor.run {
-                self.player = AVPlayer(playerItem: playerItem)
-                self.isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-                self.isLoading = false
-            }
+        .onDisappear {
+            viewModel.cleanup()
         }
     }
 }
