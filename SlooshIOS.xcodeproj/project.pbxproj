@@ -19,7 +19,7 @@
 		A0000000000000000000001A /* MovieDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000B /* MovieDetailView.swift */; };
 		A0000000000000000000001B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* SearchView.swift */; };
 		A0000000000000000000001C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* ProfileView.swift */; };
-		A0000000000000000000001D /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* TMDBService.swift */; };
+		A0000000000000000000001D /* NeoMoviesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* NeoMoviesService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +36,7 @@
 		A0000000000000000000000B /* MovieDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000C /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		A0000000000000000000000E /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
+		A0000000000000000000000E /* NeoMoviesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeoMoviesService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,7 +112,7 @@
 		A0000000000000000000003F /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				A0000000000000000000000E /* TMDBService.swift */,
+				A0000000000000000000000E /* NeoMoviesService.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -264,7 +264,7 @@
 				A0000000000000000000001A /* MovieDetailView.swift in Sources */,
 				A0000000000000000000001B /* SearchView.swift in Sources */,
 				A0000000000000000000001C /* ProfileView.swift in Sources */,
-				A0000000000000000000001D /* TMDBService.swift in Sources */,
+				A0000000000000000000001D /* NeoMoviesService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

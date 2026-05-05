@@ -101,8 +101,8 @@ struct HomeView: View {
         isLoading = true
         errorMessage = nil
         do {
-            async let fetchTrending = TMDBService.shared.fetch(endpoint: .trendingMovies)
-            async let fetchSeries = TMDBService.shared.fetch(endpoint: .newSeries)
+            async let fetchTrending = NeoMoviesService.shared.fetch(endpoint: .trendingMovies)
+            async let fetchSeries = NeoMoviesService.shared.fetch(endpoint: .newSeries)
             
             let (trending, series) = try await (fetchTrending, fetchSeries)
             
@@ -115,7 +115,7 @@ struct HomeView: View {
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = "Не удалось загрузить данные.\nУбедитесь, что вы добавили свой API ключ TMDB."
+                self.errorMessage = "Не удалось загрузить данные с NeoMovies API."
                 self.isLoading = false
                 
                 // Fallback to mock data for demonstration
