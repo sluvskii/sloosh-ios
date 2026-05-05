@@ -5,15 +5,45 @@ struct MovieCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Poster Placeholder
+            // Poster
             ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(movie.posterColor.gradient)
-                    .aspectRatio(2/3, contentMode: .fit)
-                
-                Image(systemName: "film")
-                    .font(.largeTitle)
-                    .foregroundStyle(.white.opacity(0.5))
+                if let url = movie.posterURL {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(movie.posterColor.gradient)
+                                .overlay {
+                                    ProgressView()
+                                }
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        case .failure:
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(movie.posterColor.gradient)
+                                .overlay {
+                                    Image(systemName: "film")
+                                        .font(.largeTitle)
+                                        .foregroundStyle(.white.opacity(0.5))
+                                }
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .frame(width: 140, height: 210)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                } else {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(movie.posterColor.gradient)
+                        .frame(width: 140, height: 210)
+                        .overlay {
+                            Image(systemName: "film")
+                                .font(.largeTitle)
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
+                }
                 
                 VStack {
                     Spacer()
@@ -32,6 +62,7 @@ struct MovieCardView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+            .frame(width: 140, height: 210)
             .overlay {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(.white.opacity(0.15), lineWidth: 1)

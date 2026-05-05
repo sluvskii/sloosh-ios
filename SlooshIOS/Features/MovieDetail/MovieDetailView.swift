@@ -9,9 +9,33 @@ struct MovieDetailView: View {
             VStack(spacing: 0) {
                 // Header Image Placeholder
                 ZStack(alignment: .bottomLeading) {
-                    Rectangle()
-                        .fill(movie.posterColor.gradient)
+                    if let url = movie.posterURL {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                Rectangle()
+                                    .fill(movie.posterColor.gradient)
+                                    .overlay {
+                                        ProgressView()
+                                    }
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            case .failure:
+                                Rectangle()
+                                    .fill(movie.posterColor.gradient)
+                                    .overlay {
+                                        Image(systemName: "film")
+                                            .font(.largeTitle)
+                                            .foregroundStyle(.white.opacity(0.5))
+                                    }
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
                         .frame(height: 350)
+                        .clipped()
                         .overlay {
                             LinearGradient(
                                 colors: [.clear, SlooshTheme.background],
@@ -19,6 +43,18 @@ struct MovieDetailView: View {
                                 endPoint: .bottom
                             )
                         }
+                    } else {
+                        Rectangle()
+                            .fill(movie.posterColor.gradient)
+                            .frame(height: 350)
+                            .overlay {
+                                LinearGradient(
+                                    colors: [.clear, SlooshTheme.background],
+                                    startPoint: .center,
+                                    endPoint: .bottom
+                                )
+                            }
+                    }
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text(movie.title)
