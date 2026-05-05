@@ -1,13 +1,21 @@
 import Foundation
 
-class AllohaRepository {
+class AllohaRepository: NSObject, URLSessionDelegate {
     private let token = "ffbd312217e27c4245f2678afe1881"
-    private let session: URLSession
+    private var session: URLSession!
 
-    init() {
+    override init() {
+        super.init()
         let configuration = URLSessionConfiguration.default
-        // We might need to disable some cache or handle certs, but default is fine for api.alloha.tv usually
-        self.session = URLSession(configuration: configuration)
+        self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }
+    
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if let trust = challenge.protectionSpace.serverTrust {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
     }
 
     func getContent(kpId: Int) async throws -> AllohaContent {

@@ -57,6 +57,14 @@ class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     
     // MARK: - URLSessionDataDelegate
     
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if let trust = challenge.protectionSpace.serverTrust {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+    }
+    
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         if let request = pendingRequests.first(where: { $0.value == dataTask })?.key {
             if let contentInfoRequest = request.contentInformationRequest {
