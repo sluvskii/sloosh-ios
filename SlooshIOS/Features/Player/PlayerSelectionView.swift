@@ -147,18 +147,26 @@ struct PlayerSelectionView: View {
     }
     
     private func loadData() async {
-        isLoading = true
-        errorMessage = nil
+        await MainActor.run {
+            isLoading = true
+            errorMessage = nil
+        }
+        
         do {
             let data = try await NeoMoviesService.shared.fetchStream(kpId: movie.id)
-            streamData = data
-            if data.isSeries {
-                selectedSeason = data.initialSeason
+            await MainActor.run {
+                streamData = data
+                if data.isSeries {
+                    selectedSeason = data.initialSeason
+                }
+                isLoading = false
             }
         } catch {
-            errorMessage = error.localizedDescription
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+                isLoading = false
+            }
         }
-        isLoading = false
     }
     
     private func play(url: String) {

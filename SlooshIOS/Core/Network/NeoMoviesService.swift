@@ -69,7 +69,8 @@ class NeoMoviesService {
             case .popularMovies: return "/movies/popular"
             case .topRatedSeries: return "/tv/top-rated"
             case .stream(let kpId, let season, let episode):
-                var base = "/stream/kp/\(kpId)"
+                let cleanKpId = kpId.replacingOccurrences(of: "kp_", with: "")
+                var base = "/stream/kp/\(cleanKpId)"
                 var params: [String] = []
                 if let s = season { params.append("season=\(s)") }
                 if let e = episode { params.append("episode=\(e)") }
