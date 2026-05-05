@@ -1,6 +1,6 @@
 import Foundation
 
-class AllohaRepository: NSObject, URLSessionDelegate {
+class AllohaRepository: NSObject, URLSessionDelegate, URLSessionTaskDelegate {
     private let token = "ffbd312217e27c4245f2678afe1881"
     private var session: URLSession!
 
@@ -17,9 +17,17 @@ class AllohaRepository: NSObject, URLSessionDelegate {
             completionHandler(.performDefaultHandling, nil)
         }
     }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if let trust = challenge.protectionSpace.serverTrust {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+    }
 
     func getContent(kpId: Int) async throws -> AllohaContent {
-        let urlString = "https://api.alloha.tv/?token=\(token)&kp=\(kpId)"
+        let urlString = "http://api.alloha.tv/?token=\(token)&kp=\(kpId)"
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
         }

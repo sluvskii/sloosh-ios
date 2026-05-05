@@ -1,7 +1,7 @@
 import Foundation
 import AVFoundation
 
-class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSessionDataDelegate {
+class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URLSessionDataDelegate, URLSessionTaskDelegate {
     private var headers: [String: String]
     private var session: URLSession!
     private var pendingRequests = [AVAssetResourceLoadingRequest: URLSessionDataTask]()
@@ -55,9 +55,17 @@ class AllohaResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         pendingRequests.removeValue(forKey: loadingRequest)
     }
     
-    // MARK: - URLSessionDataDelegate
+    // MARK: - URLSessionDataDelegate & URLSessionTaskDelegate
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if let trust = challenge.protectionSpace.serverTrust {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         if let trust = challenge.protectionSpace.serverTrust {
             completionHandler(.useCredential, URLCredential(trust: trust))
         } else {
