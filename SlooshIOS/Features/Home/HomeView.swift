@@ -115,14 +115,8 @@ struct HomeView: View {
             }
         } catch {
             await MainActor.run {
-                self.errorMessage = "Не удалось загрузить данные с NeoMovies API."
+                self.errorMessage = "Не удалось загрузить фильмы.\nПроверьте подключение к сети."
                 self.isLoading = false
-                
-                // Fallback to mock data for demonstration
-                if self.trendingMovies.isEmpty {
-                    self.trendingMovies = MockData.trendingMovies
-                    self.newSeries = MockData.newSeries
-                }
             }
         }
     }

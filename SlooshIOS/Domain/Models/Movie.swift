@@ -11,12 +11,6 @@ struct Movie: Identifiable, Hashable, Codable {
     let posterPath: String?
     let type: String?
     
-    var posterColor: Color {
-        let colors: [Color] = [.red, .blue, .green, .purple, .orange, .pink, .teal, .indigo]
-        let hashValue = abs(id.hashValue)
-        return colors[hashValue % colors.count]
-    }
-    
     var posterURL: URL? {
         guard let posterPath = posterPath else { return nil }
         

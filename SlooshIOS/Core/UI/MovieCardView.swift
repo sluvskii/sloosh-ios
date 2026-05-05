@@ -12,7 +12,7 @@ struct MovieCardView: View {
                         switch phase {
                         case .empty:
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(movie.posterColor.gradient)
+                                .fill(Color.secondary.opacity(0.2))
                                 .overlay {
                                     ProgressView()
                                 }
@@ -22,7 +22,7 @@ struct MovieCardView: View {
                                 .aspectRatio(contentMode: .fill)
                         case .failure:
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(movie.posterColor.gradient)
+                                .fill(Color.secondary.opacity(0.2))
                                 .overlay {
                                     Image(systemName: "film")
                                         .font(.largeTitle)
@@ -36,7 +36,7 @@ struct MovieCardView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 } else {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(movie.posterColor.gradient)
+                        .fill(Color.secondary.opacity(0.2))
                         .frame(width: 140, height: 210)
                         .overlay {
                             Image(systemName: "film")

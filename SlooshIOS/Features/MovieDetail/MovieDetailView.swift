@@ -3,6 +3,7 @@ import SwiftUI
 struct MovieDetailView: View {
     let movie: Movie
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     
     var body: some View {
         ScrollView {
@@ -14,7 +15,7 @@ struct MovieDetailView: View {
                             switch phase {
                             case .empty:
                                 Rectangle()
-                                    .fill(movie.posterColor.gradient)
+                                    .fill(Color.secondary.opacity(0.2))
                                     .overlay {
                                         ProgressView()
                                     }
@@ -24,7 +25,7 @@ struct MovieDetailView: View {
                                     .aspectRatio(contentMode: .fill)
                             case .failure:
                                 Rectangle()
-                                    .fill(movie.posterColor.gradient)
+                                    .fill(Color.secondary.opacity(0.2))
                                     .overlay {
                                         Image(systemName: "film")
                                             .font(.largeTitle)
@@ -45,7 +46,7 @@ struct MovieDetailView: View {
                         }
                     } else {
                         Rectangle()
-                            .fill(movie.posterColor.gradient)
+                            .fill(Color.secondary.opacity(0.2))
                             .frame(height: 350)
                             .overlay {
                                 LinearGradient(
@@ -79,7 +80,11 @@ struct MovieDetailView: View {
                     // Action Buttons
                     HStack(spacing: 16) {
                         Button {
-                            // Play action
+                            // Extract Kinopoisk ID if it has "kp_" prefix
+                            let cleanId = movie.id.replacingOccurrences(of: "kp_", with: "")
+                            if let url = URL(string: "https://api.neomovies.ru/api/v1/players/alloha/kp/\(cleanId)") {
+                                openURL(url)
+                            }
                         } label: {
                             Label("Смотреть", systemImage: "play.fill")
                                 .font(.headline)
