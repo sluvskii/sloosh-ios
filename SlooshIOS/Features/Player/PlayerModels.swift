@@ -1,42 +1,34 @@
 import Foundation
 
-struct Translation: Identifiable, Hashable {
-    let id: String
-    let name: String
+struct StreamResponse: Codable {
+    let title: String
+    let initialM3u8: String
+    let initialSeason: Int
+    let initialEpisode: Int
+    let episodes: [StreamEpisode]
+    let isSeries: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case title
+        case initialM3u8 = "initial_m3u8"
+        case initialSeason = "initial_season"
+        case initialEpisode = "initial_episode"
+        case episodes
+        case isSeries = "is_series"
+    }
 }
 
-struct Episode: Identifiable, Hashable {
-    let id: String
+struct StreamEpisode: Codable, Identifiable, Hashable {
+    let season: Int
+    let episode: Int
     let title: String
-    let number: Int
-    let streamURL: URL?
+    let filepath: String
+    
+    var id: String { "\(season)-\(episode)" }
 }
 
 struct Season: Identifiable, Hashable {
     let id: String
     let number: Int
-    let episodes: [Episode]
-}
-
-// Заглушки для UI
-extension Translation {
-    static let mocks = [
-        Translation(id: "1", name: "Дубляж (LostFilm)"),
-        Translation(id: "2", name: "Кубик в Кубе"),
-        Translation(id: "3", name: "Оригинал (ENG)")
-    ]
-}
-
-extension Season {
-    static let mocks = [
-        Season(id: "s1", number: 1, episodes: [
-            Episode(id: "e1", title: "Пилот", number: 1, streamURL: nil),
-            Episode(id: "e2", title: "Долгая дорога", number: 2, streamURL: nil),
-            Episode(id: "e3", title: "Буря", number: 3, streamURL: nil)
-        ]),
-        Season(id: "s2", number: 2, episodes: [
-            Episode(id: "e4", title: "Возвращение", number: 1, streamURL: nil),
-            Episode(id: "e5", title: "Новая угроза", number: 2, streamURL: nil)
-        ])
-    ]
+    let episodes: [StreamEpisode]
 }

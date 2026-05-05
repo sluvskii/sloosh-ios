@@ -7,6 +7,7 @@ pub mod search;
 pub mod torrents;
 pub mod players;
 pub mod favorites;
+pub mod stream;
 pub mod webhook;
 pub mod support;
 pub mod health;

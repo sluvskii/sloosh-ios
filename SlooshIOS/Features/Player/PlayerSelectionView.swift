@@ -5,111 +5,123 @@ struct PlayerSelectionView: View {
     let movie: Movie
     @Environment(\.dismiss) private var dismiss
     
-    @State private var selectedTranslation: Translation?
-    @State private var selectedSeason: Season?
+    @State private var streamData: StreamResponse?
+    @State private var selectedSeason: Int?
     @State private var isPlaying = false
+    @State private var currentURLToPlay: URL?
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+    
+    // Группируем серии по сезонам
+    private var seasons: [Season] {
+        guard let data = streamData else { return [] }
+        
+        let grouped = Dictionary(grouping: data.episodes, by: { $0.season })
+        return grouped.map { Season(id: "\($0.key)", number: $0.key, episodes: $0.value.sorted(by: { $0.episode < $1.episode })) }
+            .sorted(by: { $0.number < $1.number })
+    }
     
     var body: some View {
         NavigationStack {
             ZStack {
                 SlooshTheme.background.ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                if isLoading {
+                    ProgressView("Загрузка плеера...")
+                        .tint(SlooshTheme.accent)
+                } else if let error = errorMessage {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundStyle(.red)
+                        Text("Ошибка загрузки видео")
+                            .font(.headline)
+                        Text(error)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
                         
-                        // Header
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(movie.title)
-                                .font(.title.weight(.bold))
-                                .foregroundStyle(.primary)
-                            
-                            Text("Выберите параметры для просмотра")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.horizontal)
-                        
-                        // Translations
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Озвучка")
-                                .font(.headline)
-                                .foregroundStyle(.primary)
-                                .padding(.horizontal)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(Translation.mocks) { translation in
-                                        Button {
-                                            selectedTranslation = translation
-                                        } label: {
-                                            Text(translation.name)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 8)
-                                                .background(selectedTranslation == translation ? SlooshTheme.accent : Color.primary.opacity(0.1))
-                                                .foregroundStyle(selectedTranslation == translation ? .black : .primary)
-                                                .clipShape(Capsule())
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal)
+                        Button("Повторить") {
+                            Task {
+                                await loadData()
                             }
                         }
-                        
-                        // Seasons & Episodes (Только для сериалов)
-                        if movie.type == "tv" {
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text("Сезон")
-                                    .font(.headline)
+                        .buttonStyle(.borderedProminent)
+                        .tint(SlooshTheme.accent)
+                        .foregroundStyle(.black)
+                    }
+                    .padding()
+                } else if let data = streamData {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 24) {
+                            
+                            // Header
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(movie.title)
+                                    .font(.title.weight(.bold))
                                     .foregroundStyle(.primary)
-                                    .padding(.horizontal)
                                 
-                                Picker("Сезон", selection: $selectedSeason) {
-                                    ForEach(Season.mocks) { season in
-                                        Text("Сезон \(season.number)").tag(Optional(season))
+                                Text(data.isSeries ? "Выберите серию для просмотра" : "Приятного просмотра")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.horizontal)
+                            
+                            if data.isSeries {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Text("Сезон")
+                                        .font(.headline)
+                                        .foregroundStyle(.primary)
+                                        .padding(.horizontal)
+                                    
+                                    Picker("Сезон", selection: $selectedSeason) {
+                                        ForEach(seasons) { season in
+                                            Text("Сезон \(season.number)").tag(Optional(season.number))
+                                        }
                                     }
-                                }
-                                .pickerStyle(.segmented)
-                                .padding(.horizontal)
-                                
-                                if let season = selectedSeason ?? Season.mocks.first {
-                                    VStack(spacing: 8) {
-                                        ForEach(season.episodes) { episode in
-                                            Button {
-                                                // Начать воспроизведение серии
-                                                isPlaying = true
-                                            } label: {
-                                                HStack {
-                                                    Text("\(episode.number). \(episode.title)")
-                                                        .foregroundStyle(.primary)
-                                                    Spacer()
-                                                    Image(systemName: "play.circle.fill")
-                                                        .foregroundStyle(SlooshTheme.accent)
+                                    .pickerStyle(.segmented)
+                                    .padding(.horizontal)
+                                    
+                                    if let currentSeasonNum = selectedSeason, let season = seasons.first(where: { $0.number == currentSeasonNum }) {
+                                        VStack(spacing: 8) {
+                                            ForEach(season.episodes) { episode in
+                                                Button {
+                                                    play(url: episode.filepath)
+                                                } label: {
+                                                    HStack {
+                                                        Text("\(episode.episode). \(episode.title)")
+                                                            .foregroundStyle(.primary)
+                                                            .multilineTextAlignment(.leading)
+                                                        Spacer()
+                                                        Image(systemName: "play.circle.fill")
+                                                            .foregroundStyle(SlooshTheme.accent)
+                                                    }
+                                                    .padding()
+                                                    .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
                                                 }
-                                                .padding()
-                                                .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
                                             }
                                         }
+                                        .padding(.horizontal)
                                     }
-                                    .padding(.horizontal)
                                 }
+                            } else {
+                                // Фильм
+                                Button {
+                                    play(url: data.initialM3u8)
+                                } label: {
+                                    Label("Включить фильм", systemImage: "play.fill")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 16)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(SlooshTheme.accent)
+                                .foregroundStyle(.black)
+                                .padding(.horizontal)
                             }
-                        } else {
-                            // Фильм
-                            Button {
-                                isPlaying = true
-                            } label: {
-                                Label("Включить фильм", systemImage: "play.fill")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(SlooshTheme.accent)
-                            .foregroundStyle(.black)
-                            .padding(.horizontal)
                         }
+                        .padding(.vertical)
                     }
-                    .padding(.vertical)
                 }
             }
             .navigationTitle("Смотреть")
@@ -122,38 +134,65 @@ struct PlayerSelectionView: View {
                     .tint(.primary)
                 }
             }
-            .onAppear {
-                selectedTranslation = Translation.mocks.first
-                selectedSeason = Season.mocks.first
+            .task {
+                await loadData()
             }
             .fullScreenCover(isPresented: $isPlaying) {
-                // Заглушка для нативного плеера
-                NativePlayerView()
+                if let url = currentURLToPlay {
+                    NativePlayerView(url: url)
+                        .ignoresSafeArea()
+                }
             }
+        }
+    }
+    
+    private func loadData() async {
+        isLoading = true
+        errorMessage = nil
+        do {
+            let data = try await NeoMoviesService.shared.fetchStream(kpId: movie.id)
+            streamData = data
+            if data.isSeries {
+                selectedSeason = data.initialSeason
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+    
+    private func play(url: String) {
+        if let parsedURL = URL(string: url) {
+            currentURLToPlay = parsedURL
+            isPlaying = true
+        } else {
+            errorMessage = "Неверная ссылка на видео"
         }
     }
 }
 
-struct NativePlayerView: View {
-    @Environment(\.dismiss) private var dismiss
-    // URL-заглушка для теста плеера
-    let testURL = URL(string: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
+// Обертка над AVPlayerViewController для красивого системного UI
+struct NativePlayerView: UIViewControllerRepresentable {
+    let url: URL
     
-    var body: some View {
-        ZStack(alignment: .topLeading) {
-            Color.black.ignoresSafeArea()
-            
-            VideoPlayer(player: AVPlayer(url: testURL))
-                .ignoresSafeArea()
-            
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(.white)
-                    .padding()
-            }
-        }
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        let player = AVPlayer(url: url)
+        
+        // Позволяем плееру самому выбирать лучшую аудиодорожку и субтитры
+        player.appliesMediaSelectionCriteriaAutomatically = true
+        
+        controller.player = player
+        controller.showsPlaybackControls = true
+        controller.allowsPictureInPicturePlayback = true
+        
+        // Автоматически запускаем видео
+        player.play()
+        
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        // Обновлять нечего
     }
 }

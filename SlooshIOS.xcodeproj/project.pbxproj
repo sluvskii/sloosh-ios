@@ -20,8 +20,8 @@
 		A0000000000000000000001B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000C /* SearchView.swift */; };
 		A0000000000000000000001C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000D /* ProfileView.swift */; };
 		A0000000000000000000001D /* NeoMoviesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* NeoMoviesService.swift */; };
-		A0000000000000000000001D /* PlayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000E /* PlayerModels.swift */; };
-		A0000000000000000000001E /* PlayerSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000F /* PlayerSelectionView.swift */; };
+		A0000000000000000000001E /* PlayerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000000F /* PlayerModels.swift */; };
+		A0000000000000000000001F /* PlayerSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000010 /* PlayerSelectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,8 +39,8 @@
 		A0000000000000000000000C /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		A0000000000000000000000E /* NeoMoviesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeoMoviesService.swift; sourceTree = "<group>"; };
-		A0000000000000000000000E /* PlayerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerModels.swift; sourceTree = "<group>"; };
-		A0000000000000000000000F /* PlayerSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSelectionView.swift; sourceTree = "<group>"; };
+		A0000000000000000000000F /* PlayerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerModels.swift; sourceTree = "<group>"; };
+		A00000000000000000000010 /* PlayerSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,13 +108,13 @@
 		A00000000000000000000036 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				A0000000000000000000003F /* Network */,
+				A00000000000000000000040 /* Network */,
 				A00000000000000000000039 /* UI */,
 			);
 			path = Core;
 			sourceTree = "<group>";
 		};
-		A0000000000000000000003F /* Network */ = {
+		A00000000000000000000040 /* Network */ = {
 			isa = PBXGroup;
 			children = (
 				A0000000000000000000000E /* NeoMoviesService.swift */,
@@ -192,8 +192,8 @@
 		A0000000000000000000003F /* Player */ = {
 			isa = PBXGroup;
 			children = (
-				A0000000000000000000000E /* PlayerModels.swift */,
-				A0000000000000000000000F /* PlayerSelectionView.swift */,
+				A0000000000000000000000F /* PlayerModels.swift */,
+				A00000000000000000000010 /* PlayerSelectionView.swift */,
 			);
 			path = Player;
 			sourceTree = "<group>";
@@ -278,8 +278,8 @@
 				A0000000000000000000001A /* MovieDetailView.swift in Sources */,
 				A0000000000000000000001B /* SearchView.swift in Sources */,
 				A0000000000000000000001C /* ProfileView.swift in Sources */,
-				A0000000000000000000001D /* PlayerModels.swift in Sources */,
-				A0000000000000000000001E /* PlayerSelectionView.swift in Sources */,
+				A0000000000000000000001E /* PlayerModels.swift in Sources */,
+				A0000000000000000000001F /* PlayerSelectionView.swift in Sources */,
 
 				A0000000000000000000001D /* NeoMoviesService.swift in Sources */,
 			);
