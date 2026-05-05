@@ -1,109 +1,110 @@
-import SwiftUI
+import Foundation
 
-struct Movie: Identifiable, Hashable, Codable {
+struct Movie: Identifiable, Codable, Hashable {
     let id: String
     let title: String
-    let description: String
-    let rating: Double
-    let year: String
-    let genre: String
-    let duration: String
-    let posterPath: String?
+    let originalTitle: String?
+    let year: Int?
+    let rating: Double?
+    let posterUrl: String?
+    let backdropUrl: String?
+    let description: String?
     let type: String?
-    
-    var posterURL: URL? {
-        guard let posterPath = posterPath else { return nil }
-        
-        if posterPath.hasPrefix("http") {
-            return URL(string: posterPath)
-        }
-        
-        // По документации NeoMovies API, картинки раздаются через их прокси
-        let baseURL = "https://api.neomovies.ru"
-        return URL(string: baseURL + posterPath)
-    }
-    
-    // Структура жанра из NeoMovies API
+    let genres: [Genre]?
+    let externalIds: ExternalIds?
+
     struct Genre: Codable, Hashable {
         let id: String?
-        let name: String
+        let name: String?
     }
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case title
-        case originalTitle
-        case description
-        case rating
-        case year
-        case posterUrl
-        case genres
-        case type
+
+    struct ExternalIds: Codable, Hashable {
+        let kp: Int?
+        let tmdb: Int?
+        let imdb: String?
     }
-    
-    init(id: String = UUID().uuidString, title: String, description: String, rating: Double, year: String, genre: String, duration: String, posterPath: String? = nil, type: String? = "movie") {
+
+    init(
+        id: String,
+        title: String,
+        originalTitle: String? = nil,
+        year: Int? = nil,
+        rating: Double? = nil,
+        posterUrl: String? = nil,
+        backdropUrl: String? = nil,
+        description: String? = nil,
+        type: String? = nil,
+        genres: [Genre]? = nil,
+        externalIds: ExternalIds? = nil
+    ) {
         self.id = id
         self.title = title
-        self.description = description
-        self.rating = rating
+        self.originalTitle = originalTitle
         self.year = year
-        self.genre = genre
-        self.duration = duration
-        self.posterPath = posterPath
+        self.rating = rating
+        self.posterUrl = posterUrl
+        self.backdropUrl = backdropUrl
+        self.description = description
         self.type = type
+        self.genres = genres
+        self.externalIds = externalIds
     }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        self.id = try container.decode(String.self, forKey: .id)
-        
-        if let title = try? container.decode(String.self, forKey: .title) {
-            self.title = title
-        } else if let originalTitle = try? container.decode(String.self, forKey: .originalTitle) {
-            self.title = originalTitle
-        } else {
-            self.title = "Unknown"
-        }
-        
-        self.description = try container.decodeIfPresent(String.self, forKey: .description) ?? "Описание отсутствует"
-        self.rating = try container.decodeIfPresent(Double.self, forKey: .rating) ?? 0.0
-        
-        if let yearInt = try? container.decodeIfPresent(Int.self, forKey: .year) {
-            self.year = String(yearInt)
-        } else if let yearString = try? container.decodeIfPresent(String.self, forKey: .year) {
-            self.year = yearString
-        } else {
-            self.year = ""
-        }
-        
-        self.posterPath = try container.decodeIfPresent(String.self, forKey: .posterUrl)
-        self.type = try container.decodeIfPresent(String.self, forKey: .type)
-        
-        if let genres = try? container.decodeIfPresent([Genre].self, forKey: .genres), !genres.isEmpty {
-            self.genre = genres.prefix(2).map { $0.name.capitalized }.joined(separator: ", ")
-        } else {
-            self.genre = self.type == "tv" ? "Сериал" : "Фильм"
-        }
-        
-        self.duration = self.type == "tv" ? "Сериал" : "Фильм"
+
+    var fullPosterUrl: String? {
+        guard let path = posterUrl else { return nil }
+        if path.hasPrefix("http") { return path }
+        return "https://api.neomovies.ru" + path
     }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(title, forKey: .title)
-        try container.encode(description, forKey: .description)
-        try container.encode(rating, forKey: .rating)
-        
-        if let yearInt = Int(year) {
-            try container.encode(yearInt, forKey: .year)
+
+    var fullBackdropUrl: String? {
+        guard let path = backdropUrl else { return nil }
+        if path.hasPrefix("http") { return path }
+        return "https://api.neomovies.ru" + path
+    }
+
+    var kpId: Int? {
+        let clean = id.replacingOccurrences(of: "kp_", with: "")
+        return Int(clean)
+    }
+
+    var isSerial: Bool {
+        type == "tv"
+    }
+
+    // Compatibility helpers for existing SwiftUI views.
+    var posterURL: URL? {
+        guard let fullPosterUrl else { return nil }
+        return URL(string: fullPosterUrl)
+    }
+
+    var backdropURL: URL? {
+        guard let fullBackdropUrl else { return nil }
+        return URL(string: fullBackdropUrl)
+    }
+
+    var genre: String {
+        let names = (genres ?? [])
+            .compactMap(\.name)
+            .prefix(2)
+
+        if names.isEmpty {
+            return isSerial ? "Сериал" : "Фильм"
         }
-        
-        try container.encode(posterPath, forKey: .posterUrl)
-        try container.encode(type, forKey: .type)
-        
-        let singleGenre = Genre(id: nil, name: genre)
-        try container.encode([singleGenre], forKey: .genres)
+
+        return names.joined(separator: ", ")
+    }
+
+    var yearText: String {
+        guard let year else { return "Неизвестно" }
+        return String(year)
+    }
+
+    var ratingValue: Double {
+        rating ?? 0
+    }
+
+    var descriptionText: String {
+        let trimmed = description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? "Описание отсутствует" : trimmed
     }
 }

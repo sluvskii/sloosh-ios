@@ -65,12 +65,12 @@ struct MovieDetailView: View {
                             .foregroundStyle(.primary)
                         
                         HStack(spacing: 12) {
-                            Label(String(format: "%.1f", movie.rating), systemImage: "star.fill")
+                            Label(String(format: "%.1f", movie.ratingValue), systemImage: "star.fill")
                                 .foregroundStyle(.yellow)
                             Text("•")
-                            Text(movie.year)
+                            Text(movie.yearText)
                             Text("•")
-                            Text(movie.type == "tv" ? "Сериал" : "Фильм")
+                            Text(movie.isSerial ? "Сериал" : "Фильм")
                         }
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
@@ -110,7 +110,7 @@ struct MovieDetailView: View {
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.primary)
                         
-                        Text(movie.description)
+                        Text(movie.descriptionText)
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .lineSpacing(4)
@@ -121,9 +121,9 @@ struct MovieDetailView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             InfoRow(title: "Жанр", value: movie.genre)
                             Divider().background(Color.primary.opacity(0.1))
-                            InfoRow(title: "Год выхода", value: movie.year)
+                            InfoRow(title: "Год выхода", value: movie.yearText)
                             Divider().background(Color.primary.opacity(0.1))
-                            InfoRow(title: "Тип", value: movie.type == "tv" ? "Сериал" : "Фильм")
+                            InfoRow(title: "Тип", value: movie.isSerial ? "Сериал" : "Фильм")
                         }
                         .foregroundStyle(.primary)
                     }

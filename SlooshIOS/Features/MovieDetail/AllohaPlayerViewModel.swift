@@ -19,40 +19,20 @@ class AllohaPlayerViewModel: ObservableObject, AllohaParserDelegate {
         self.player?.pause()
         self.player = nil
         
-        let kpIdStr = movie.id.replacingOccurrences(of: "kp_", with: "")
-        guard let kpId = Int(kpIdStr) else {
-            self.errorMessage = "Неверный ID фильма"
+        guard let kpId = movie.kpId else {
+            self.errorMessage = "Неверный ID фильма: \(movie.id)"
             self.isLoading = false
             return
         }
         
         do {
-            let content = try await repository.getContent(kpId: kpId)
-            
-            var iframeUrl: String?
-            if content.isSerial {
-                // Если сериал, берем первый сезон, первый эпизод, первый перевод
-                if let firstSeason = content.seasons.first,
-                   let firstEpisode = firstSeason.episodes.first,
-                   let firstTranslation = firstEpisode.translations.first {
-                    iframeUrl = firstTranslation.iframeUrl
-                }
-            } else {
-                iframeUrl = content.movieIframe
-            }
-            
-            guard let url = iframeUrl, !url.isEmpty else {
-                self.errorMessage = "Не найдена ссылка на видео"
-                self.isLoading = false
-                return
-            }
-            
+            let iframeUrl = try await repository.getIframeUrl(kpId: kpId)
+
             self.parser = AllohaParser()
             self.parser?.delegate = self
-            self.parser?.parse(iframeUrl: url)
-            
+            self.parser?.parse(iframeUrl: iframeUrl)
         } catch {
-            self.errorMessage = error.localizedDescription
+            self.errorMessage = "Ошибка загрузки: \(error.localizedDescription)"
             self.isLoading = false
         }
     }

@@ -51,7 +51,7 @@ struct MovieCardView: View {
                         Image(systemName: "star.fill")
                             .foregroundStyle(.yellow)
                             .font(.caption2)
-                        Text(String(format: "%.1f", movie.rating))
+                        Text(String(format: "%.1f", movie.ratingValue))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.white)
                     }
