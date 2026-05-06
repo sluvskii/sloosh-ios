@@ -14,19 +14,6 @@ struct MovieDetailView: View {
                 // Poster
                 posterSection
                 
-                // Title
-                Text(movie.title)
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .opacity(isTitleVisible ? 0 : 1)
-                    .onScrollVisibilityChange(threshold: 0.1) { isVisible in
-                        withAnimation(.smooth(duration: 0.3)) {
-                            isTitleVisible = !isVisible
-                        }
-                    }
-                
                 // Play Button
                 Button {
                     isPlayerPresented = true
@@ -35,13 +22,22 @@ struct MovieDetailView: View {
                         Image(systemName: "play.fill")
                         Text("Смотреть")
                     }
-                    .font(.title3.weight(.bold))
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(.black)
-                    .padding(.vertical, 18)
-                    .frame(maxWidth: .infinity)
-                    .background(SlooshTheme.accent, in: Capsule())
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 40)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.894, green: 1.0, blue: 0.745), // #E4FFBE
+                                Color(red: 0.702, green: 1.0, blue: 0.0)    // #B3FF00
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        in: Capsule()
+                    )
                 }
-                .padding(.horizontal, 24)
                 
                 // Stats Row
                 HStack(spacing: 12) {
@@ -121,16 +117,10 @@ struct MovieDetailView: View {
             }
         }
         .background(SlooshTheme.background.ignoresSafeArea())
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackgroundVisibility(isTitleVisible ? .visible : .hidden, for: .navigationBar)
+        .navigationTitle(movie.title)
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(movie.title)
-                    .font(.headline)
-                    .opacity(isTitleVisible ? 1 : 0)
-            }
-            
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     isFavorite.toggle()
