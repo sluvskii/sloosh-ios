@@ -6,12 +6,26 @@ struct MovieDetailView: View {
     @State private var isPlayerPresented = false
     @State private var isDescriptionExpanded = false
     @State private var isFavorite = false
+    @State private var isTitleVisible = false
     
     var body: some View {
         ScrollView {
             VStack(spacing: 28) {
                 // Poster
                 posterSection
+                
+                // Title
+                Text(movie.title)
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .opacity(isTitleVisible ? 0 : 1)
+                    .onScrollVisibilityChange(threshold: 0.1) { isVisible in
+                        withAnimation(.smooth(duration: 0.3)) {
+                            isTitleVisible = !isVisible
+                        }
+                    }
                 
                 // Play Button
                 Button {
@@ -107,20 +121,28 @@ struct MovieDetailView: View {
             }
         }
         .background(SlooshTheme.background.ignoresSafeArea())
-        .navigationTitle(movie.title)
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackgroundVisibility(isTitleVisible ? .visible : .hidden, for: .navigationBar)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(movie.title)
+                    .font(.headline)
+                    .opacity(isTitleVisible ? 1 : 0)
+            }
+            
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     isFavorite.toggle()
                 } label: {
                     Image(systemName: isFavorite ? "bookmark.fill" : "bookmark")
                 }
+                .tint(.primary)
 
                 ShareLink(item: shareURL) {
                     Image(systemName: "square.and.arrow.up")
                 }
+                .tint(.primary)
             }
         }
         .fullScreenCover(isPresented: $isPlayerPresented) {
