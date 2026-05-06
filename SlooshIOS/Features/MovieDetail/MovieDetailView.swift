@@ -3,16 +3,13 @@ import AVKit
 
 struct MovieDetailView: View {
     let movie: Movie
-    @Environment(\.dismiss) private var dismiss
     @State private var isPlayerPresented = false
     @State private var isDescriptionExpanded = false
+    @State private var isFavorite = false
     
     var body: some View {
         ScrollView {
             VStack(spacing: 28) {
-                // Top Action Bar
-                topBar
-                
                 // Poster
                 posterSection
                 
@@ -92,7 +89,7 @@ struct MovieDetailView: View {
                 
                 Spacer(minLength: 40)
             }
-            .padding(.top, 16) // Padding to clear safe area slightly
+            .padding(.top, 24)
         }
         .background {
             ZStack(alignment: .top) {
@@ -120,49 +117,27 @@ struct MovieDetailView: View {
                 }
             }
         }
-        .navigationBarHidden(true)
+        .navigationTitle(movie.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    isFavorite.toggle()
+                } label: {
+                    Image(systemName: isFavorite ? "bookmark.fill" : "bookmark")
+                }
+
+                ShareLink(item: shareURL) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+        }
         .fullScreenCover(isPresented: $isPlayerPresented) {
             PlayerView(movie: movie)
         }
     }
-    
-    private var topBar: some View {
-        HStack {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.title3.weight(.medium))
-                    .foregroundStyle(.primary)
-                    .frame(width: 40, height: 40)
-                    .background(.regularMaterial, in: Circle())
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 12) {
-                Button {
-                    // Bookmark
-                } label: {
-                    Image(systemName: "bookmark")
-                        .font(.title3.weight(.medium))
-                        .foregroundStyle(.primary)
-                        .frame(width: 40, height: 40)
-                        .background(.regularMaterial, in: Circle())
-                }
-                
-                ShareLink(item: URL(string: "https://sloosh.ru/movie/\(movie.id)")!) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.title3.weight(.medium))
-                        .foregroundStyle(.primary)
-                        .frame(width: 40, height: 40)
-                        .background(.regularMaterial, in: Circle())
-                }
-            }
-        }
-        .padding(.horizontal)
-    }
-    
+
     private var posterSection: some View {
         ZStack {
             if let url = movie.posterURL {
@@ -199,6 +174,10 @@ struct MovieDetailView: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(.white.opacity(0.15), lineWidth: 1)
         }
+    }
+
+    private var shareURL: URL {
+        URL(string: "https://sloosh.ru/movie/\(movie.id)")!
     }
 }
 
