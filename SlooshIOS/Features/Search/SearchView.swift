@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State private var searchText = ""
+    @StateObject private var viewModel = SearchViewModel()
+    
+    let columns = [
+        GridItem(.adaptive(minimum: 140), spacing: 16)
+    ]
     
     var body: some View {
         NavigationStack {
@@ -9,7 +13,7 @@ struct SearchView: View {
                 SlooshTheme.background.ignoresSafeArea()
                 
                 VStack {
-                    if searchText.isEmpty {
+                    if viewModel.searchText.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 48))
@@ -18,15 +22,56 @@ struct SearchView: View {
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                         }
+                        .frame(maxHeight: .infinity)
+                    } else if viewModel.isLoading {
+                        ProgressView()
+                            .frame(maxHeight: .infinity)
+                    } else if let errorMessage = viewModel.errorMessage {
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.magnifyingglass")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.tertiary)
+                            Text(errorMessage)
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxHeight: .infinity)
                     } else {
-                        // Here will be search results
-                        Spacer()
+                        ScrollView {
+                            LazyVGrid(columns: columns, spacing: 24) {
+                                ForEach(viewModel.movies) { movie in
+                                    NavigationLink(value: movie) {
+                                        MovieCardView(movie: movie)
+                                            .onAppear {
+                                                Task {
+                                                    await viewModel.loadMoreIfNeeded(currentMovie: movie)
+                                                }
+                                            }
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 16)
+                            .padding(.bottom, 24)
+                            
+                            if viewModel.isLoadingMore {
+                                ProgressView()
+                                    .padding()
+                            }
+                        }
                     }
                 }
             }
             .navigationTitle("Поиск")
+            .navigationDestination(for: Movie.self) { movie in
+                MovieDetailView(movie: movie)
+            }
         }
-        .searchable(text: $searchText, prompt: "Название фильма...")
+        .searchable(text: $viewModel.searchText, prompt: "Название фильма...")
+        .onChange(of: viewModel.searchText) { _, _ in
+            viewModel.performSearch()
+        }
     }
 }
 

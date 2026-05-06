@@ -36,9 +36,7 @@ struct ProfileView: View {
                                 Divider().background(Color.primary.opacity(0.1)).padding(.vertical, 12)
                                 
                                 NavigationLink {
-                                    Text("Настройки")
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .background(SlooshTheme.background.ignoresSafeArea())
+                                    SettingsView()
                                 } label: {
                                     SettingsRow(icon: "gearshape.fill", title: "Настройки")
                                 }

@@ -32,12 +32,12 @@ struct MovieCardView: View {
                             EmptyView()
                         }
                     }
-                    .frame(width: 140, height: 210)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 } else {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(Color.secondary.opacity(0.2))
-                        .frame(width: 140, height: 210)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .overlay {
                             Image(systemName: "film")
                                 .font(.largeTitle)
@@ -62,7 +62,8 @@ struct MovieCardView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .frame(width: 140, height: 210)
+            .aspectRatio(140/210, contentMode: .fit)
+            .frame(maxWidth: .infinity)
             .overlay {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(.white.opacity(0.15), lineWidth: 1)
@@ -81,7 +82,7 @@ struct MovieCardView: View {
                     .lineLimit(1)
             }
         }
-        .frame(width: 140)
+        .frame(maxWidth: .infinity)
     }
 }
 

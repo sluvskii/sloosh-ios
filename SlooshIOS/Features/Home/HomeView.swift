@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var trendingMovies: [Movie] = []
-    @State private var newSeries: [Movie] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String? = nil
+    @StateObject private var viewModel = HomeViewModel()
+    
+    let columns = [
+        GridItem(.adaptive(minimum: 140), spacing: 16)
+    ]
     
     var body: some View {
         NavigationStack {
@@ -12,76 +13,50 @@ struct HomeView: View {
                 SlooshTheme.background
                     .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 32) {
+                if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else if let errorMessage = viewModel.errorMessage {
+                    VStack(spacing: 16) {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
                         
-                        if isLoading && trendingMovies.isEmpty {
-                            ProgressView()
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.top, 50)
-                        } else if let errorMessage = errorMessage, trendingMovies.isEmpty {
-                            VStack(spacing: 16) {
-                                Text(errorMessage)
-                                    .foregroundStyle(.red)
-                                    .multilineTextAlignment(.center)
-                                
-                                Button("Повторить") {
-                                    Task {
-                                        await loadData()
-                                    }
-                                }
-                                .buttonStyle(.bordered)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, 50)
-                        } else {
-                            // Trending Section
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text("В тренде")
-                                    .font(.title2.weight(.bold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, 20)
-                                
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 16) {
-                                        ForEach(trendingMovies) { movie in
-                                            NavigationLink(value: movie) {
-                                                MovieCardView(movie: movie)
-                                            }
-                                            .buttonStyle(.plain)
-                                        }
-                                    }
-                                    .padding(.horizontal, 20)
-                                }
-                            }
-                            
-                            // New Series Section
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text("Новые сериалы")
-                                    .font(.title2.weight(.bold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, 20)
-                                
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 16) {
-                                        ForEach(newSeries) { movie in
-                                            NavigationLink(value: movie) {
-                                                MovieCardView(movie: movie)
-                                            }
-                                            .buttonStyle(.plain)
-                                        }
-                                    }
-                                    .padding(.horizontal, 20)
-                                }
+                        Button("Повторить") {
+                            Task {
+                                await viewModel.loadInitial()
                             }
                         }
-                        
-                        Spacer(minLength: 40)
+                        .buttonStyle(.bordered)
                     }
-                    .padding(.top, 20)
-                }
-                .refreshable {
-                    await loadData()
+                    .padding()
+                } else {
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 24) {
+                            ForEach(viewModel.movies) { movie in
+                                NavigationLink(value: movie) {
+                                    MovieCardView(movie: movie)
+                                        .onAppear {
+                                            Task {
+                                                await viewModel.loadMoreIfNeeded(currentMovie: movie)
+                                            }
+                                        }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 16)
+                        .padding(.bottom, 24)
+                        
+                        if viewModel.isLoadingMore {
+                            ProgressView()
+                                .padding()
+                        }
+                    }
+                    .refreshable {
+                        await viewModel.refresh()
+                    }
                 }
             }
             .navigationTitle("sloosh")
@@ -91,33 +66,7 @@ struct HomeView: View {
             }
         }
         .task {
-            if trendingMovies.isEmpty {
-                await loadData()
-            }
-        }
-    }
-    
-    private func loadData() async {
-        isLoading = true
-        errorMessage = nil
-        do {
-            async let fetchTrending = NeoMoviesService.shared.getPopular()
-            async let fetchSeries = NeoMoviesService.shared.getTopTv()
-            
-            let (trending, series) = try await (fetchTrending, fetchSeries)
-            
-            // В SwiftUI начиная с iOS 15 свойства @State можно обновлять из async контекста,
-            // но для надежности обернем в MainActor (или можно просто использовать await MainActor.run)
-            await MainActor.run {
-                self.trendingMovies = trending
-                self.newSeries = series
-                self.isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = "Не удалось загрузить фильмы.\nПроверьте подключение к сети."
-                self.isLoading = false
-            }
+            await viewModel.loadInitial()
         }
     }
 }
