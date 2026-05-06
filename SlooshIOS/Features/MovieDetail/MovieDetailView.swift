@@ -14,6 +14,19 @@ struct MovieDetailView: View {
                 // Poster
                 posterSection
                 
+                // Title
+                Text(movie.title)
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .opacity(isTitleVisible ? 0 : 1)
+                    .onScrollVisibilityChange(threshold: 0.1) { isVisible in
+                        withAnimation(.smooth(duration: 0.3)) {
+                            isTitleVisible = !isVisible
+                        }
+                    }
+                
                 // Play Button
                 Button {
                     isPlayerPresented = true
@@ -27,13 +40,14 @@ struct MovieDetailView: View {
                     .padding(.vertical, 14)
                     .padding(.horizontal, 40)
                     .background(
-                        LinearGradient(
+                        RadialGradient(
                             colors: [
                                 Color(red: 0.894, green: 1.0, blue: 0.745), // #E4FFBE
                                 Color(red: 0.702, green: 1.0, blue: 0.0)    // #B3FF00
                             ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                            center: .topLeading,
+                            startRadius: 0,
+                            endRadius: 150
                         ),
                         in: Capsule()
                     )
@@ -117,10 +131,16 @@ struct MovieDetailView: View {
             }
         }
         .background(SlooshTheme.background.ignoresSafeArea())
-        .navigationTitle(movie.title)
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarBackgroundVisibility(.automatic, for: .navigationBar)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackgroundVisibility(isTitleVisible ? .visible : .hidden, for: .navigationBar)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(movie.title)
+                    .font(.headline)
+                    .opacity(isTitleVisible ? 1 : 0)
+            }
+            
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     isFavorite.toggle()
