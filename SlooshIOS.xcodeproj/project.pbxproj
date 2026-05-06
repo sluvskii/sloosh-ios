@@ -25,6 +25,10 @@
 		A00000000000000000000103 /* AllohaParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000203 /* AllohaParser.swift */; };
 		A00000000000000000000104 /* AllohaResourceLoaderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000204 /* AllohaResourceLoaderDelegate.swift */; };
 		A00000000000000000000105 /* AllohaPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000205 /* AllohaPlayerViewModel.swift */; };
+		A00000000000000000000106 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000206 /* AppTheme.swift */; };
+		A00000000000000000000107 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000207 /* SettingsView.swift */; };
+		A00000000000000000000108 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000208 /* HomeViewModel.swift */; };
+		A00000000000000000000109 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000209 /* SearchViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +51,10 @@
 		A00000000000000000000203 /* AllohaParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaParser.swift; sourceTree = "<group>"; };
 		A00000000000000000000204 /* AllohaResourceLoaderDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaResourceLoaderDelegate.swift; sourceTree = "<group>"; };
 		A00000000000000000000205 /* AllohaPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllohaPlayerViewModel.swift; sourceTree = "<group>"; };
+		A00000000000000000000206 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		A00000000000000000000207 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A00000000000000000000208 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		A00000000000000000000209 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000005 /* SlooshTheme.swift */,
+				A00000000000000000000206 /* AppTheme.swift */,
 			);
 			path = Theme;
 			sourceTree = "<group>";
@@ -151,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000003 /* HomeView.swift */,
+				A00000000000000000000208 /* HomeViewModel.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -178,6 +188,7 @@
 			isa = PBXGroup;
 			children = (
 				A0000000000000000000000C /* SearchView.swift */,
+				A00000000000000000000209 /* SearchViewModel.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -186,6 +197,7 @@
 			isa = PBXGroup;
 			children = (
 				A0000000000000000000000D /* ProfileView.swift */,
+				A00000000000000000000207 /* SettingsView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -293,6 +305,10 @@
 				A00000000000000000000103 /* AllohaParser.swift in Sources */,
 				A00000000000000000000104 /* AllohaResourceLoaderDelegate.swift in Sources */,
 				A00000000000000000000105 /* AllohaPlayerViewModel.swift in Sources */,
+				A00000000000000000000106 /* AppTheme.swift in Sources */,
+				A00000000000000000000107 /* SettingsView.swift in Sources */,
+				A00000000000000000000108 /* HomeViewModel.swift in Sources */,
+				A00000000000000000000109 /* SearchViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
