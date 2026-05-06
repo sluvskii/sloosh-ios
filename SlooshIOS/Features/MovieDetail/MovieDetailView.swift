@@ -18,7 +18,7 @@ struct MovieDetailView: View {
                 
                 // Title
                 Text(movie.title)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
@@ -94,7 +94,32 @@ struct MovieDetailView: View {
             }
             .padding(.top, 16) // Padding to clear safe area slightly
         }
-        .background(SlooshTheme.background.ignoresSafeArea())
+        .background {
+            ZStack(alignment: .top) {
+                SlooshTheme.background.ignoresSafeArea()
+                
+                if let url = movie.posterURL {
+                    AsyncImage(url: url) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: UIScreen.main.bounds.width, height: 600)
+                                .clipped()
+                                .blur(radius: 40, opaque: true)
+                                .overlay {
+                                    LinearGradient(
+                                        colors: [SlooshTheme.background.opacity(0.2), SlooshTheme.background],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                }
+                        }
+                    }
+                    .ignoresSafeArea()
+                }
+            }
+        }
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $isPlayerPresented) {
             PlayerView(movie: movie)
@@ -107,10 +132,10 @@ struct MovieDetailView: View {
                 dismiss()
             } label: {
                 Image(systemName: "chevron.left")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(SlooshTheme.accent)
-                    .frame(width: 44, height: 44)
-                    .background(.ultraThinMaterial, in: Circle())
+                    .font(.title3.weight(.medium))
+                    .foregroundStyle(.primary)
+                    .frame(width: 40, height: 40)
+                    .background(.regularMaterial, in: Circle())
             }
             
             Spacer()
@@ -120,18 +145,18 @@ struct MovieDetailView: View {
                     // Bookmark
                 } label: {
                     Image(systemName: "bookmark")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(SlooshTheme.accent)
-                        .frame(width: 44, height: 44)
-                        .background(.ultraThinMaterial, in: Circle())
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(.primary)
+                        .frame(width: 40, height: 40)
+                        .background(.regularMaterial, in: Circle())
                 }
                 
                 ShareLink(item: URL(string: "https://sloosh.ru/movie/\(movie.id)")!) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(SlooshTheme.accent)
-                        .frame(width: 44, height: 44)
-                        .background(.ultraThinMaterial, in: Circle())
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(.primary)
+                        .frame(width: 40, height: 40)
+                        .background(.regularMaterial, in: Circle())
                 }
             }
         }
@@ -144,7 +169,7 @@ struct MovieDetailView: View {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(Color.secondary.opacity(0.2))
                             .overlay { ProgressView() }
                     case .success(let image):
@@ -152,7 +177,7 @@ struct MovieDetailView: View {
                             .resizable()
                             .scaledToFit()
                     case .failure:
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(Color.secondary.opacity(0.2))
                             .overlay {
                                 Image(systemName: "film")
@@ -164,16 +189,15 @@ struct MovieDetailView: View {
                     }
                 }
             } else {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.secondary.opacity(0.2))
             }
         }
-        .frame(width: UIScreen.main.bounds.width * 0.65)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: SlooshTheme.accent.opacity(0.15), radius: 30, y: 15)
+        .frame(width: UIScreen.main.bounds.width * 0.5)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(.white.opacity(0.1), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(.white.opacity(0.15), lineWidth: 1)
         }
     }
 }
