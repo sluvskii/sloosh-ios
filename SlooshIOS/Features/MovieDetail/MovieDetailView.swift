@@ -6,6 +6,7 @@ struct MovieDetailView: View {
     @State private var isPlayerPresented = false
     @State private var isDescriptionExpanded = false
     @State private var isFavorite = false
+    @State private var isTitleVisible = false
     
     var body: some View {
         ScrollView {
@@ -19,6 +20,11 @@ struct MovieDetailView: View {
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .onScrollVisibilityChange(threshold: 0.1) { isVisible in
+                        withAnimation(.smooth(duration: 0.3)) {
+                            isTitleVisible = !isVisible
+                        }
+                    }
                 
                 // Play Button
                 Button {
@@ -71,7 +77,7 @@ struct MovieDetailView: View {
                     
                     if movie.descriptionText.count > 100 {
                         Button {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            withAnimation(.spring(duration: 0.4, bounce: 0.2)) {
                                 isDescriptionExpanded.toggle()
                             }
                         } label: {
@@ -90,11 +96,7 @@ struct MovieDetailView: View {
                 Spacer(minLength: 40)
             }
             .padding(.top, 24)
-        }
-        .background {
-            ZStack(alignment: .top) {
-                SlooshTheme.background.ignoresSafeArea()
-                
+            .background(alignment: .top) {
                 if let url = movie.posterURL {
                     AsyncImage(url: url) { phase in
                         if let image = phase.image {
@@ -113,23 +115,26 @@ struct MovieDetailView: View {
                                 }
                         }
                     }
-                    .ignoresSafeArea()
+                    .padding(.top, -150)
                 }
             }
         }
-        .navigationTitle(movie.title)
+        .background(SlooshTheme.background.ignoresSafeArea())
+        .navigationTitle(isTitleVisible ? movie.title : "")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarBackgroundVisibility(isTitleVisible ? .visible : .hidden, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     isFavorite.toggle()
                 } label: {
                     Image(systemName: isFavorite ? "bookmark.fill" : "bookmark")
+                        .foregroundStyle(.primary)
                 }
 
                 ShareLink(item: shareURL) {
                     Image(systemName: "square.and.arrow.up")
+                        .foregroundStyle(.primary)
                 }
             }
         }

@@ -59,7 +59,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .navigationTitle("sloosh")
+            .navigationTitle("Главная")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Movie.self) { movie in
                 MovieDetailView(movie: movie)
