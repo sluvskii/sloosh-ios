@@ -20,6 +20,7 @@ struct MovieDetailView: View {
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .opacity(isTitleVisible ? 0 : 1)
                     .onScrollVisibilityChange(threshold: 0.1) { isVisible in
                         withAnimation(.smooth(duration: 0.3)) {
                             isTitleVisible = !isVisible
@@ -120,21 +121,25 @@ struct MovieDetailView: View {
             }
         }
         .background(SlooshTheme.background.ignoresSafeArea())
-        .navigationTitle(isTitleVisible ? movie.title : "")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackgroundVisibility(isTitleVisible ? .visible : .hidden, for: .navigationBar)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(movie.title)
+                    .font(.headline)
+                    .opacity(isTitleVisible ? 1 : 0)
+            }
+            
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     isFavorite.toggle()
                 } label: {
                     Image(systemName: isFavorite ? "bookmark.fill" : "bookmark")
-                        .foregroundStyle(.primary)
                 }
 
                 ShareLink(item: shareURL) {
                     Image(systemName: "square.and.arrow.up")
-                        .foregroundStyle(.primary)
                 }
             }
         }
