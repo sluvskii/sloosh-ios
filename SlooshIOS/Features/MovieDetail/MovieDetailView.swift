@@ -41,13 +41,13 @@ struct MovieDetailView: View {
                     .padding(.horizontal, 40)
                     .background(
                         RadialGradient(
-                            colors: [
+                            gradient: Gradient(colors: [
                                 Color(red: 0.894, green: 1.0, blue: 0.745), // #E4FFBE
                                 Color(red: 0.702, green: 1.0, blue: 0.0)    // #B3FF00
-                            ],
-                            center: .topLeading,
+                            ]),
+                            center: UnitPoint(x: 0.3, y: 0.3),
                             startRadius: 0,
-                            endRadius: 150
+                            endRadius: 100
                         ),
                         in: Capsule()
                     )
