@@ -5,82 +5,20 @@ struct MovieDetailView: View {
     let movie: Movie
     @Environment(\.dismiss) private var dismiss
     @State private var isPlayerPresented = false
+    @State private var isDescriptionExpanded = false
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 28) {
                 // Top Action Bar
-                HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.title3)
-                            .foregroundStyle(.primary)
-                            .padding(12)
-                            .background(.ultraThinMaterial, in: Circle())
-                    }
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 16) {
-                        Button {
-                            // Bookmark action
-                        } label: {
-                            Image(systemName: "bookmark")
-                                .font(.title3)
-                                .foregroundStyle(.primary)
-                                .padding(12)
-                                .background(.ultraThinMaterial, in: Circle())
-                        }
-                        
-                        ShareLink(item: URL(string: "https://sloosh.ru/movie/\(movie.id)")!) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.title3)
-                                .foregroundStyle(.primary)
-                                .padding(12)
-                                .background(.ultraThinMaterial, in: Circle())
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.top, 16)
+                topBar
                 
                 // Poster
-                if let url = movie.posterURL {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .fill(Color.secondary.opacity(0.2))
-                                .overlay {
-                                    ProgressView()
-                                }
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        case .failure:
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .fill(Color.secondary.opacity(0.2))
-                                .overlay {
-                                    Image(systemName: "film")
-                                        .font(.largeTitle)
-                                        .foregroundStyle(.white.opacity(0.5))
-                                }
-                        @unknown default:
-                            EmptyView()
-                        }
-                    }
-                    .frame(width: UIScreen.main.bounds.width * 0.65)
-                    .aspectRatio(2/3, contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
-                }
+                posterSection
                 
                 // Title
                 Text(movie.title)
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
@@ -95,57 +33,66 @@ struct MovieDetailView: View {
                     }
                     .font(.title3.weight(.bold))
                     .foregroundStyle(.black)
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 32)
+                    .padding(.vertical, 18)
+                    .frame(maxWidth: .infinity)
                     .background(SlooshTheme.accent, in: Capsule())
                 }
-                .padding(.top, 8)
+                .padding(.horizontal, 24)
                 
                 // Stats Row
-                HStack(spacing: 0) {
-                    StatItem(title: "КИНОПОИСК", value: String(format: "%.1f", movie.ratingValue), valueColor: SlooshTheme.accent)
-                        .frame(maxWidth: .infinity)
-                    
-                    StatItem(title: "IMDb", value: String(format: "%.1f", movie.ratingValue), valueColor: SlooshTheme.accent) // TODO: map imdb rating if available
-                        .frame(maxWidth: .infinity)
-                    
-                    StatItem(title: "Длительность", value: "—", valueColor: .primary)
-                        .frame(maxWidth: .infinity)
-                    
-                    StatItem(title: "Возраст", value: "18+", valueColor: .primary)
-                        .frame(maxWidth: .infinity)
+                HStack(spacing: 12) {
+                    StatCard(title: "Кинопоиск", value: String(format: "%.1f", movie.ratingValue), color: SlooshTheme.accent)
+                    StatCard(title: "IMDb", value: "—", color: SlooshTheme.accent) // TODO: map imdb rating
+                    StatCard(title: "Время", value: "—", color: .primary)
+                    StatCard(title: "Возраст", value: "18+", color: .primary)
                 }
                 .padding(.horizontal)
-                .padding(.top, 16)
                 
                 // Info List
-                VStack(alignment: .leading, spacing: 16) {
-                    InfoTextRow(title: "Дата выхода:", value: movie.yearText)
-                    InfoTextRow(title: "Страна:", value: "—")
-                    InfoTextRow(title: "Жанр:", value: movie.genre)
-                    InfoTextRow(title: "Режиссер:", value: "—")
+                VStack(spacing: 12) {
+                    InfoRowView(title: "Дата выхода", value: movie.yearText)
+                    InfoRowView(title: "Страна", value: "—")
+                    InfoRowView(title: "Жанр", value: movie.genre)
+                    InfoRowView(title: "Режиссер", value: "—")
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .padding(.horizontal)
-                .padding(.top, 8)
                 
                 // Description
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Описание")
-                        .font(.title3.weight(.bold))
+                        .font(.title2.weight(.bold))
                         .foregroundStyle(.primary)
                     
                     Text(movie.descriptionText)
                         .font(.body)
                         .foregroundStyle(.secondary)
-                        .lineSpacing(4)
+                        .lineSpacing(6)
+                        .lineLimit(isDescriptionExpanded ? nil : 4)
+                        .animation(.easeInOut, value: isDescriptionExpanded)
+                    
+                    if movie.descriptionText.count > 100 {
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                isDescriptionExpanded.toggle()
+                            }
+                        } label: {
+                            Text(isDescriptionExpanded ? "Скрыть" : "Показать полностью")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(SlooshTheme.accent)
+                        }
+                        .padding(.top, 4)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .padding(.horizontal)
-                .padding(.top, 8)
                 
                 Spacer(minLength: 40)
             }
+            .padding(.top, 16) // Padding to clear safe area slightly
         }
         .background(SlooshTheme.background.ignoresSafeArea())
         .navigationBarHidden(true)
@@ -153,38 +100,122 @@ struct MovieDetailView: View {
             PlayerView(movie: movie)
         }
     }
-}
-
-struct StatItem: View {
-    let title: String
-    let value: String
-    let valueColor: Color
     
-    var body: some View {
-        VStack(spacing: 6) {
-            Text(value)
-                .font(.title2.weight(.bold))
-                .foregroundStyle(valueColor)
-            Text(title)
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
+    private var topBar: some View {
+        HStack {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(SlooshTheme.accent)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
+            
+            Spacer()
+            
+            HStack(spacing: 12) {
+                Button {
+                    // Bookmark
+                } label: {
+                    Image(systemName: "bookmark")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(SlooshTheme.accent)
+                        .frame(width: 44, height: 44)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+                
+                ShareLink(item: URL(string: "https://sloosh.ru/movie/\(movie.id)")!) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(SlooshTheme.accent)
+                        .frame(width: 44, height: 44)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private var posterSection: some View {
+        ZStack {
+            if let url = movie.posterURL {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(Color.secondary.opacity(0.2))
+                            .overlay { ProgressView() }
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFit()
+                    case .failure:
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(Color.secondary.opacity(0.2))
+                            .overlay {
+                                Image(systemName: "film")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.white.opacity(0.5))
+                            }
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+            } else {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color.secondary.opacity(0.2))
+            }
+        }
+        .frame(width: UIScreen.main.bounds.width * 0.65)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: SlooshTheme.accent.opacity(0.15), radius: 30, y: 15)
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(.white.opacity(0.1), lineWidth: 1)
         }
     }
 }
 
-struct InfoTextRow: View {
+struct StatCard: View {
+    let title: String
+    let value: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(value)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(color)
+            Text(title)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 4)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+}
+
+struct InfoRowView: View {
     let title: String
     let value: String
     
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack {
             Text(title)
-                .font(.body.weight(.medium))
-                .foregroundStyle(.primary)
-            Text(value)
-                .font(.body)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.trailing)
         }
     }
 }
