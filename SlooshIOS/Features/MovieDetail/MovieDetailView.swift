@@ -28,19 +28,7 @@ struct MovieDetailView: View {
                     }
                 
                 // Play Button
-                Button {
-                    isPlayerPresented = true
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "play.fill")
-                        Text("Смотреть")
-                    }
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.black)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 40)
-                    .background(playButtonBackground)
-                }
+                playButton
                 
                 // Stats Row
                 HStack(spacing: 12) {
@@ -191,28 +179,43 @@ struct MovieDetailView: View {
         URL(string: "https://sloosh.ru/movie/\(movie.id)")!
     }
 
-    private var playButtonBackground: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            let radius = max(size.width, size.height) * 0.9
-
-            Capsule()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            Color(red: 0.894, green: 1.0, blue: 0.745),
-                            Color(red: 0.702, green: 1.0, blue: 0.0)
-                        ],
-                        center: UnitPoint(x: 0.33, y: 0.56),
-                        startRadius: 0,
-                        endRadius: radius
-                    )
-                )
-                .overlay {
-                    Capsule()
-                        .stroke(.white.opacity(0.14), lineWidth: 1)
-                }
+    @ViewBuilder
+    private var playButton: some View {
+        if #available(iOS 26.0, *) {
+            Button {
+                isPlayerPresented = true
+            } label: {
+                playButtonLabel
+            }
+            .buttonStyle(.glassProminent)
+            .tint(playButtonTint)
+        } else {
+            Button {
+                isPlayerPresented = true
+            } label: {
+                playButtonLabel
+                    .foregroundStyle(.black)
+                    .background(playButtonTint, in: Capsule())
+                    .overlay {
+                        Capsule()
+                            .stroke(.white.opacity(0.14), lineWidth: 1)
+                    }
+            }
         }
+    }
+
+    private var playButtonLabel: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "play.fill")
+            Text("Смотреть")
+        }
+        .font(.headline.weight(.bold))
+        .padding(.vertical, 14)
+        .padding(.horizontal, 40)
+    }
+
+    private var playButtonTint: Color {
+        Color(red: 0.702, green: 1.0, blue: 0.0)
     }
 }
 
