@@ -214,7 +214,7 @@ struct MovieDetailView: View {
             Image(systemName: "play.fill")
             Text("Смотреть")
         }
-        .font(.subheadline.weight(.semibold))
+        .font(.headline.weight(.bold))
     }
 
     private var playButtonTint: Color {
