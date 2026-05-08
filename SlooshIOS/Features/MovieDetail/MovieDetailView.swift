@@ -185,7 +185,10 @@ struct MovieDetailView: View {
             Button {
                 isPlayerPresented = true
             } label: {
-                playButtonGlassLabel
+                playButtonBaseContent
+                    .foregroundStyle(.primary)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 40)
             }
             .buttonStyle(.glassProminent)
             .tint(playButtonTint)
@@ -212,20 +215,6 @@ struct MovieDetailView: View {
             Text("Смотреть")
         }
         .font(.headline.weight(.bold))
-    }
-
-    private var playButtonGlassLabel: some View {
-        playButtonBaseContent
-            .foregroundStyle(.white.opacity(0.96))
-            .overlay {
-                playButtonBaseContent
-                    .foregroundStyle(.black.opacity(0.3))
-                    .blendMode(.overlay)
-            }
-            .compositingGroup()
-            .shadow(color: .black.opacity(0.14), radius: 0, y: 1)
-        .padding(.vertical, 14)
-        .padding(.horizontal, 40)
     }
 
     private var playButtonTint: Color {
