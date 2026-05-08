@@ -185,7 +185,7 @@ struct MovieDetailView: View {
             Button {
                 isPlayerPresented = true
             } label: {
-                playButtonLabel
+                playButtonGlassLabel
             }
             .buttonStyle(.glassProminent)
             .tint(playButtonTint)
@@ -193,8 +193,10 @@ struct MovieDetailView: View {
             Button {
                 isPlayerPresented = true
             } label: {
-                playButtonLabel
+                playButtonBaseContent
                     .foregroundStyle(.black)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 40)
                     .background(playButtonTint, in: Capsule())
                     .overlay {
                         Capsule()
@@ -204,12 +206,24 @@ struct MovieDetailView: View {
         }
     }
 
-    private var playButtonLabel: some View {
+    private var playButtonBaseContent: some View {
         HStack(spacing: 8) {
             Image(systemName: "play.fill")
             Text("Смотреть")
         }
         .font(.headline.weight(.bold))
+    }
+
+    private var playButtonGlassLabel: some View {
+        playButtonBaseContent
+            .foregroundStyle(.white.opacity(0.96))
+            .overlay {
+                playButtonBaseContent
+                    .foregroundStyle(.black.opacity(0.3))
+                    .blendMode(.overlay)
+            }
+            .compositingGroup()
+            .shadow(color: .black.opacity(0.14), radius: 0, y: 1)
         .padding(.vertical, 14)
         .padding(.horizontal, 40)
     }
