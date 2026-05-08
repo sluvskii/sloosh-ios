@@ -192,23 +192,27 @@ struct MovieDetailView: View {
     }
 
     private var playButtonBackground: some View {
-        Capsule()
-            .fill(
-                RadialGradient(
-                    colors: [
-                        Color(red: 0.894, green: 1.0, blue: 0.745),
-                        Color(red: 0.702, green: 1.0, blue: 0.0)
-                    ],
-                    center: UnitPoint(x: 0.33, y: 0.56),
-                    startRadius: 0,
-                    endRadius: 220
+        GeometryReader { proxy in
+            let size = proxy.size
+            let radius = max(size.width, size.height) * 0.9
+
+            Capsule()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(red: 0.894, green: 1.0, blue: 0.745),
+                            Color(red: 0.702, green: 1.0, blue: 0.0)
+                        ],
+                        center: UnitPoint(x: 0.33, y: 0.56),
+                        startRadius: 0,
+                        endRadius: radius
+                    )
                 )
-            )
-            .overlay {
-                Capsule()
-                    .stroke(.white.opacity(0.28), lineWidth: 1)
-            }
-            .shadow(color: Color(red: 0.702, green: 1.0, blue: 0.0).opacity(0.28), radius: 20, y: 10)
+                .overlay {
+                    Capsule()
+                        .stroke(.white.opacity(0.14), lineWidth: 1)
+                }
+        }
     }
 }
 
