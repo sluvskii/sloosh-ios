@@ -186,9 +186,9 @@ struct MovieDetailView: View {
                 isPlayerPresented = true
             } label: {
                 playButtonBaseContent
-                    .foregroundStyle(.primary)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 40)
+                    .foregroundStyle(.black)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 24)
             }
             .buttonStyle(.glassProminent)
             .tint(playButtonTint)
@@ -198,8 +198,8 @@ struct MovieDetailView: View {
             } label: {
                 playButtonBaseContent
                     .foregroundStyle(.black)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 40)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 24)
                     .background(playButtonTint, in: Capsule())
                     .overlay {
                         Capsule()
@@ -210,11 +210,11 @@ struct MovieDetailView: View {
     }
 
     private var playButtonBaseContent: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Image(systemName: "play.fill")
             Text("Смотреть")
         }
-        .font(.headline.weight(.bold))
+        .font(.subheadline.weight(.semibold))
     }
 
     private var playButtonTint: Color {
