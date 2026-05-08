@@ -39,18 +39,7 @@ struct MovieDetailView: View {
                     .foregroundStyle(.black)
                     .padding(.vertical, 14)
                     .padding(.horizontal, 40)
-                    .background(
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.894, green: 1.0, blue: 0.745), // #E4FFBE
-                                Color(red: 0.702, green: 1.0, blue: 0.0)    // #B3FF00
-                            ]),
-                            center: UnitPoint(x: 0.3, y: 0.3),
-                            startRadius: 0,
-                            endRadius: 100
-                        ),
-                        in: Capsule()
-                    )
+                    .background(playButtonBackground)
                 }
                 
                 // Stats Row
@@ -200,6 +189,26 @@ struct MovieDetailView: View {
 
     private var shareURL: URL {
         URL(string: "https://sloosh.ru/movie/\(movie.id)")!
+    }
+
+    private var playButtonBackground: some View {
+        Capsule()
+            .fill(
+                RadialGradient(
+                    colors: [
+                        Color(red: 0.894, green: 1.0, blue: 0.745),
+                        Color(red: 0.702, green: 1.0, blue: 0.0)
+                    ],
+                    center: UnitPoint(x: 0.33, y: 0.56),
+                    startRadius: 0,
+                    endRadius: 220
+                )
+            )
+            .overlay {
+                Capsule()
+                    .stroke(.white.opacity(0.28), lineWidth: 1)
+            }
+            .shadow(color: Color(red: 0.702, green: 1.0, blue: 0.0).opacity(0.28), radius: 20, y: 10)
     }
 }
 
