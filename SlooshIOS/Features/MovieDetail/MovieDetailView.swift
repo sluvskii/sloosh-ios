@@ -133,7 +133,7 @@ struct MovieDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $isPlayerPresented) {
-            PlayerView(movie: movie)
+            AllohaPlayerView(movie: movie)
         }
     }
 
