@@ -13,8 +13,11 @@ class SimplePlayerRepository {
         self.neoId = neoId
     }
     
+    // MARK: - Video Source
+    
     func getVideoSource(kpId: Int, season: Int? = nil, episode: Int? = nil) async throws -> VideoSource {
         do {
+            print("Getting video source for kpId: \(kpId)")
             return try await tryCDN(kpId: kpId, season: season, episode: episode)
         } catch {
             print("CDN failed: \(error)")
