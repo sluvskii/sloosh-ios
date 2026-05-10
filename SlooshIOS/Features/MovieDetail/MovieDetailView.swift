@@ -33,7 +33,7 @@ struct MovieDetailView: View {
                 // Stats Row
                 HStack(spacing: 12) {
                     StatCard(title: "Кинопоиск", value: String(format: "%.1f", movie.ratingValue), color: SlooshTheme.accent)
-                    StatCard(title: "IMDb", value: "—", color: SlooshTheme.accent) // TODO: map imdb rating
+                    StatCard(title: "IMDb", value: "—", color: SlooshTheme.accent)
                     StatCard(title: "Время", value: "—", color: .primary)
                     StatCard(title: "Возраст", value: "18+", color: .primary)
                 }
@@ -267,91 +267,5 @@ struct InfoRowView: View {
 #Preview {
     NavigationStack {
         MovieDetailView(movie: MockData.trendingMovies[0])
-    }
-}
-
-struct PlayerView: View {
-    let movie: Movie
-    @State private var player: AVPlayer?
-    @State private var isLoading = true
-    @State private var errorMessage: String?
-    @Environment(\.dismiss) private var dismiss
-    
-    @StateObject private var viewModel = AllohaPlayerViewModel()
-    
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            
-            if let player = viewModel.player {
-                VideoPlayer(player: player)
-                    .ignoresSafeArea()
-                    .onAppear {
-                        player.play()
-                    }
-                    .onDisappear {
-                        player.pause()
-                    }
-            } else if viewModel.isLoading {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .tint(.white)
-                    Text("Загрузка видео...")
-                        .foregroundStyle(.white)
-                }
-            } else if let errorMessage = viewModel.errorMessage {
-                VStack(spacing: 16) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.largeTitle)
-                        .foregroundStyle(.red)
-                    Text("Ошибка загрузки видео")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                    Text(errorMessage)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    Button("Повторить") {
-                        Task {
-                            await viewModel.loadVideo(for: movie)
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(SlooshTheme.accent)
-                    .foregroundStyle(.white)
-                    .padding(.top, 8)
-                    
-                    Button("Закрыть") {
-                        dismiss()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(SlooshTheme.accent)
-                    .foregroundStyle(.black)
-                    .padding(.top, 4)
-                }
-            }
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.white.opacity(0.8))
-                            .padding()
-                    }
-                }
-                Spacer()
-            }
-        }
-        .task {
-            await viewModel.loadVideo(for: movie)
-        }
-        .onDisappear {
-            viewModel.cleanup()
-        }
     }
 }
